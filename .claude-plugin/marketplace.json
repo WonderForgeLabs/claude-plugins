@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wonderforgelabs",
+  "description": "Claude Code plugins by WonderForgeLabs",
+  "owner": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "plugins": [
+    {
+      "name": "aspire-bisect",
+      "description": "Bisect .NET Aspire NuGet daily builds to pinpoint regressions. Uses git worktrees, adaptive sampling, and DCP log collection.",
+      "version": "1.0.0",
+      "source": "./plugins/aspire-bisect",
+      "category": "development",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/aspire-bisect"
+    }
+  ]
+}
