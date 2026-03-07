@@ -9,7 +9,7 @@ Bisect .NET Aspire NuGet daily builds to pinpoint regressions. Uses git worktree
 claude plugin marketplace add WonderForgeLabs/claude-plugins
 
 # Install the plugin
-claude plugin install aspire-bisect@wonderforgelabs
+claude plugin install aspire-bisect@wonderforgelabs-plugins
 ```
 
 ## Usage

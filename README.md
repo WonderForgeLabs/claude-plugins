@@ -11,7 +11,7 @@ claude plugin marketplace add WonderForgeLabs/claude-plugins
 Then install individual plugins:
 
 ```bash
-claude plugin install <plugin-name>@wonderforgelabs
+claude plugin install <plugin-name>@wonderforgelabs-plugins
 ```
 
 ## Plugins

@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "wonderforgelabs",
+  "name": "wonderforgelabs-plugins",
   "description": "Claude Code plugins by WonderForgeLabs",
   "owner": {
     "name": "WonderForgeLabs",
