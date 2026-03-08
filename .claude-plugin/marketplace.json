@@ -42,6 +42,18 @@
         "url": "https://github.com/WonderForgeLabs"
       },
       "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/pr-feedback-sweep"
+    },
+    {
+      "name": "dotnet-quality",
+      "description": ".NET development quality toolkit — TDD workflow, CI failure diagnosis, and auto-formatting hook.",
+      "version": "1.0.0",
+      "source": "./plugins/dotnet-quality",
+      "category": "development",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/dotnet-quality"
     }
   ]
 }
