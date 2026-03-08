@@ -20,7 +20,7 @@ claude plugin install dotnet-quality@wonderforgelabs-plugins
 |------|------|------|
 | C# auto-format | Runs `dotnet format` on changed files | Any `.cs` file edit |
 
-The formatting hook auto-discovers the nearest `.sln` or `.slnx` file (up to 2 directories above the project root) so it works with any .NET solution layout.
+The formatting hook auto-discovers the nearest `.sln` or `.slnx` file (up to 2 levels below the project root) so it works with any .NET solution layout.
 
 ### Skills
 
@@ -58,6 +58,7 @@ If no run-id is provided, it finds the latest failed run for the current branch.
 ## Requirements
 
 - .NET SDK with `dotnet format` support (.NET 6+)
+- `jq` for parsing tool input JSON
 - GitHub CLI (`gh`) for CI diagnosis
 - Node.js (optional, for Jest/Playwright TDD)
 

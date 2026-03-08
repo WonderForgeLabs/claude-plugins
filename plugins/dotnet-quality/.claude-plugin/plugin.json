@@ -8,20 +8,5 @@
   },
   "repository": "https://github.com/WonderForgeLabs/claude-plugins",
   "license": "MIT",
-  "keywords": ["dotnet", "csharp", "tdd", "ci", "formatting", "testing"],
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.cs) slnfile=$(find \"$CLAUDE_PROJECT_DIR\" -maxdepth 2 -name '*.sln' -o -name '*.slnx' 2>/dev/null | head -1); [ -n \"$slnfile\" ] && { dotnet format \"$slnfile\" --include \"$f\" --no-restore 2>/dev/null || true; } || { dotnet format --include \"$f\" --no-restore 2>/dev/null || true; }; break;; esac; done",
-            "timeout": 30,
-            "statusMessage": "Formatting C#..."
-          }
-        ]
-      }
-    ]
-  }
+  "keywords": ["dotnet", "csharp", "tdd", "ci", "formatting", "testing"]
 }
