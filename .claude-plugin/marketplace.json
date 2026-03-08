@@ -42,6 +42,18 @@
         "url": "https://github.com/WonderForgeLabs"
       },
       "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/pr-feedback-sweep"
+    },
+    {
+      "name": "web-quality",
+      "description": "TypeScript/JavaScript quality hooks — auto-lint, type-check, and test runner with console.log and any-type warnings.",
+      "version": "1.0.0",
+      "source": "./plugins/web-quality",
+      "category": "quality",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/web-quality"
     }
   ]
 }
