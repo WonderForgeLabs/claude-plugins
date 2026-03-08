@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.ts|*.tsx|*.js|*.jsx) if [ -f \"$(dirname \"$f\")/package.json\" ] || d=\"$f\"; while [ \"$d\" != \"/\" ]; do d=$(dirname \"$d\"); [ -f \"$d/package.json\" ] && break; done; [ -f \"$d/package.json\" ]; then cd \"$d\" && npx eslint --fix \"$f\" 2>/dev/null || true; fi; break;; esac; done",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.ts|*.tsx|*.js|*.jsx) d=$(dirname \"$f\"); while [ \"$d\" != \"/\" ] && [ ! -f \"$d/package.json\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/package.json\" ] && { cd \"$d\" && npx eslint --fix \"$f\" 2>/dev/null || true; }; break;; esac; done",
             "timeout": 30,
             "statusMessage": "Linting TypeScript/JavaScript..."
           }
