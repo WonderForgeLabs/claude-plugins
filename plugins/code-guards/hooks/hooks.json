@@ -1,0 +1,50 @@
+{
+  "description": "Protective hooks that block editing sensitive files and lint shell scripts",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in *.env|*.env.*|*/.env|*secrets*|*.local) echo \"BLOCK: Cannot edit environment/secret files: $FILE_PATH\" >&2; exit 2;; esac",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in */Generated/*|*/obj/*|*/bin/*|*/dist/*|*/build/*) echo \"BLOCK: Cannot edit generated/build output files: $FILE_PATH\" >&2; exit 2;; esac",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in */yarn.lock|*/package-lock.json|*/packages.lock.json|*/pnpm-lock.yaml|*/Cargo.lock|*/go.sum|*/poetry.lock) echo \"BLOCK: Cannot edit lock files: $FILE_PATH\" >&2; exit 2;; esac",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in *.sh) command -v shellcheck >/dev/null 2>&1 && { shellcheck --severity=warning \"$FILE_PATH\" 2>&1 | head -20 || true; } || true;; esac",
+            "timeout": 15,
+            "statusMessage": "Checking shell script..."
+          }
+        ]
+      }
+    ]
+  }
+}

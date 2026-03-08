@@ -30,4 +30,5 @@ claude plugin install code-guards@wonderforgelabs-plugins
 
 ## Requirements
 
+- `jq` (required, used to parse hook stdin JSON)
 - `shellcheck` (optional, skips gracefully if not installed)
