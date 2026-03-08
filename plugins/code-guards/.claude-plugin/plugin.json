@@ -1,0 +1,59 @@
+{
+  "name": "code-guards",
+  "version": "1.0.0",
+  "description": "Protective hooks that block editing of environment files, generated code, and lock files. Includes shell script linting.",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/claude-plugins",
+  "license": "MIT",
+  "keywords": ["hooks", "security", "linting", "shellcheck", "guard-rails"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.env*|*secrets*|*.local) echo \"BLOCK: Cannot edit environment/secret files: $f\" >&2; exit 1;; esac; done",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in */Generated/*|*/obj/*|*/bin/*|*/dist/*|*/build/*) echo \"BLOCK: Cannot edit generated/build output files: $f\" >&2; exit 1;; esac; done",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in */yarn.lock|*/package-lock.json|*/packages.lock.json|*/pnpm-lock.yaml|*/Cargo.lock|*/go.sum|*/poetry.lock) echo \"BLOCK: Cannot edit lock files: $f\" >&2; exit 1;; esac; done",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.sh) command -v shellcheck >/dev/null 2>&1 && { shellcheck --severity=warning \"$f\" 2>&1 | head -20 || true; } || true; break;; esac; done",
+            "timeout": 15,
+            "statusMessage": "Checking shell script..."
+          }
+        ]
+      }
+    ]
+  }
+}
