@@ -1,0 +1,12 @@
+{
+  "name": "pr-feedback-sweep",
+  "version": "1.0.0",
+  "description": "Scan open PRs for unresolved review feedback and dispatch fix agents. Works with any GitHub repository.",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/claude-plugins",
+  "license": "MIT",
+  "keywords": ["github", "pull-request", "code-review", "feedback", "automation"]
+}
