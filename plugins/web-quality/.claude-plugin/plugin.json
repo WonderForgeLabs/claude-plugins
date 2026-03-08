@@ -8,42 +8,5 @@
   },
   "repository": "https://github.com/WonderForgeLabs/claude-plugins",
   "license": "MIT",
-  "keywords": ["typescript", "javascript", "eslint", "jest", "quality", "hooks"],
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.ts|*.tsx|*.js|*.jsx) d=$(dirname \"$f\"); while [ \"$d\" != \"/\" ] && [ ! -f \"$d/package.json\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/package.json\" ] && { cd \"$d\" && npx eslint --fix \"$f\" 2>/dev/null || true; }; break;; esac; done",
-            "timeout": 30,
-            "statusMessage": "Linting TypeScript/JavaScript..."
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.ts|*.tsx) d=\"$f\"; while [ \"$d\" != \"/\" ]; do d=$(dirname \"$d\"); [ -f \"$d/tsconfig.json\" ] && break; done; [ -f \"$d/tsconfig.json\" ] && { cd \"$d\" && npx tsc --noEmit 2>&1 | head -20 || true; }; break;; esac; done",
-            "timeout": 60,
-            "statusMessage": "Type-checking TypeScript..."
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *__tests__*|*.test.*|*.spec.*) continue;; *.ts|*.tsx) for ext in test.ts test.tsx spec.ts spec.tsx; do d=$(dirname \"$f\"); b=$(basename \"$f\" | sed 's/\\.[^.]*$//'); for td in \"$d/__tests__\" \"$d\"; do t=\"$td/$b.$ext\"; [ -f \"$t\" ] && { root=\"$f\"; while [ \"$root\" != \"/\" ]; do root=$(dirname \"$root\"); [ -f \"$root/package.json\" ] && break; done; cd \"$root\" && npx jest --no-coverage --bail \"$t\" 2>&1 | tail -10 || true; break 3; }; done; done; break;; esac; done",
-            "timeout": 60,
-            "statusMessage": "Running related tests..."
-          }
-        ]
-      }
-    ]
-  }
+  "keywords": ["typescript", "javascript", "eslint", "jest", "quality", "hooks"]
 }

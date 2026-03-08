@@ -31,6 +31,7 @@ claude plugin install web-quality@wonderforgelabs-plugins
 
 ## Requirements
 
+- `jq` (for parsing hook stdin JSON)
 - Node.js with `npx` available
 - ESLint configured in the project
 - TypeScript configured (`tsconfig.json`)
