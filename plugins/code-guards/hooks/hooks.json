@@ -3,17 +3,17 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in *.env|*.env.*|*/.env|*secrets*|*.local) echo \"BLOCK: Cannot edit environment/secret files: $FILE_PATH\" >&2; exit 2;; esac",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in *.env|*.env.*|*/.env|*secrets*|*.env.local) echo \"BLOCK: Cannot edit environment/secret files: $FILE_PATH\" >&2; exit 2;; esac",
             "timeout": 5
           }
         ]
       },
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
@@ -23,11 +23,11 @@
         ]
       },
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in */yarn.lock|*/package-lock.json|*/packages.lock.json|*/pnpm-lock.yaml|*/Cargo.lock|*/go.sum|*/poetry.lock) echo \"BLOCK: Cannot edit lock files: $FILE_PATH\" >&2; exit 2;; esac",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in */yarn.lock|*/package-lock.json|*/packages.lock.json|*/pnpm-lock.yaml|*/Cargo.lock|*/go.sum|*/poetry.lock|*/Gemfile.lock|*/composer.lock) echo \"BLOCK: Cannot edit lock files: $FILE_PATH\" >&2; exit 2;; esac",
             "timeout": 5
           }
         ]
@@ -35,7 +35,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",

@@ -18,9 +18,9 @@ claude plugin install code-guards@wonderforgelabs-plugins
 
 | Guard | Patterns | Purpose |
 |-------|----------|---------|
-| Environment files | `*.env*`, `*secrets*`, `*.local` | Prevent accidental secret exposure |
+| Environment files | `*.env*`, `*secrets*`, `*.env.local` | Prevent accidental secret exposure |
 | Generated code | `*/Generated/*`, `*/obj/*`, `*/bin/*`, `*/dist/*`, `*/build/*` | Protect build outputs |
-| Lock files | `yarn.lock`, `package-lock.json`, `pnpm-lock.yaml`, `Cargo.lock`, etc. | Prevent dependency corruption |
+| Lock files | `yarn.lock`, `package-lock.json`, `pnpm-lock.yaml`, `Cargo.lock`, `Gemfile.lock`, `composer.lock`, etc. | Prevent dependency corruption |
 
 ### PostToolUse Checks (runs after editing)
 
