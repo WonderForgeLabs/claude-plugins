@@ -34,7 +34,7 @@ DEPTH=$(cat "$CONFIG_FILE" | $YQ '.format.sln_discovery_depth' 2>/dev/null || tr
 [ -z "$DEPTH" ] && DEPTH=2
 
 # Find solution file
-slnfile=$(find "$CLAUDE_PROJECT_DIR" -maxdepth "$DEPTH" -name '*.sln' -o -name '*.slnx' 2>/dev/null | sort | head -1)
+slnfile=$(find "$CLAUDE_PROJECT_DIR" -maxdepth "$DEPTH" \( -name '*.sln' -o -name '*.slnx' \) 2>/dev/null | sort | head -1)
 
 if [ -n "$slnfile" ]; then
   dotnet format "$slnfile" --include "$FILE_PATH" --no-restore 2>/dev/null || true
