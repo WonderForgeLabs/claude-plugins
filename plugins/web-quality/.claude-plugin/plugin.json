@@ -8,5 +8,5 @@
   },
   "repository": "https://github.com/WonderForgeLabs/claude-plugins",
   "license": "MIT",
-  "keywords": ["typescript", "javascript", "eslint", "jest", "quality", "hooks"]
+  "keywords": ["typescript", "javascript", "eslint", "jest", "quality", "hooks", "yq"]
 }
