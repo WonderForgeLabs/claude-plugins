@@ -1,0 +1,190 @@
+name: Issue Intake
+
+on:
+  issues:
+    types: [opened, labeled]
+
+concurrency:
+  group: issue-intake-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  intake:
+    if: |
+      (
+        github.event.action == 'opened' &&
+        (
+          github.event.issue.author_association == 'MEMBER' ||
+          github.event.issue.author_association == 'COLLABORATOR' ||
+          github.event.issue.author_association == 'OWNER' ||
+          github.event.sender.login == 'claude[bot]' ||
+          github.event.sender.login == 'copilot[bot]'
+        )
+      ) ||
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name == 'needs-triage'
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+      actions: read
+      repository-projects: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Install yq
+        run: |
+          YQ_VERSION=v4.44.1
+          wget -q "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -O yq
+          sudo mv yq /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Issue Intake with Claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"
+          GH_PROJECTS_PAT: ${{ secrets.GH_PROJECTS_PAT }}
+        with:
+          allowed_bots: "claude[bot],copilot[bot]"
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --allowedTools "Bash(gh:*),Bash(yq:*),Bash(date:*),Bash(./scripts/project/*:*),mcp__github__get_issue,mcp__github__search_issues,mcp__github__list_issues,mcp__github__update_issue,mcp__github__add_issue_comment,mcp__github__get_issue_comments,mcp__github__issue_write" --model "claude-opus-4-6"
+          prompt: |
+            You are an issue intake agent. Your job is to fully process a new (or re-triaged) GitHub issue: check for duplicates, apply labels, populate the GitHub Projects V2 board, wire up epic/sub-issue relationships, and evaluate blockers.
+
+            ## Context
+
+            - REPO: ${{ github.repository }}
+            - ISSUE_NUMBER: ${{ github.event.issue.number }}
+            - EVENT: ${{ github.event_name }}.${{ github.event.action }}
+
+            ## Step 1: Read the Issue
+
+            Use `mcp__github__get_issue` to read issue #${{ github.event.issue.number }} in full (title, body, existing labels, assignees).
+
+            ## Step 2: Parallel Analysis (delegate to sub-agents)
+
+            Spawn these three sub-agents in parallel:
+
+            ### Sub-agent A: Duplicate Check
+            Search for similar OPEN issues using `mcp__github__search_issues` with keywords from the title and body. Criteria for duplicate: same bug, same feature request (even if worded differently), same root problem. Return: list of potential duplicates with confidence (high/medium/low).
+
+            ### Sub-agent B: Label Selection
+            Run `gh label list --limit 100` to get available labels. Analyze the issue content and select appropriate labels considering: issue type (bug, feature, chore, etc.), area labels, technical labels. Return: list of labels to apply.
+
+            ### Sub-agent C: Epic Search
+            Search for existing epic issues using `mcp__github__search_issues` with query `is:issue is:open "[Epic]" in:title`. Also search for issues with labels matching the area of this issue. Return: list of candidate parent epics with relevance.
+
+            ## Step 3: Handle Duplicates
+
+            If Sub-agent A found a HIGH confidence duplicate:
+            1. Add a polite comment linking to the original issue(s)
+            2. Apply the "duplicate" label
+            3. STOP — do not proceed with further intake
+
+            If only medium/low confidence duplicates found, note them but continue.
+
+            ## Step 4: Apply Labels
+
+            Using Sub-agent B's recommendations, apply labels via `mcp__github__update_issue`. Include any existing labels (don't remove them). If the `needs-triage` label is present, remove it (triage is now complete).
+
+            ## Step 5: Add to Project Board and Set Fields
+
+            **If `.claude/project-ops.yaml` does not exist, skip all project board steps (Steps 5a-5f).**
+
+            Helper scripts are available in `scripts/project/`. All project IDs and field IDs are stored in `.claude/project-ops.yaml` — read that file with `yq` to get IDs. The scripts already read from it automatically.
+
+            ### 5a: Add issue to the project board (idempotent)
+
+            **IMPORTANT**: All project board API calls require the org-scoped PAT. Prefix every `./scripts/project/` call and project-related `gh api graphql` call with `GH_TOKEN=$GH_PROJECTS_PAT` so the `gh` CLI authenticates with the correct token.
+
+            ```bash
+            ISSUE_NODE_ID=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --jq .node_id)
+            ITEM_ID=$(GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/add-item.sh "$ISSUE_NODE_ID")
+            ```
+
+            ### 5b: Set Status = Todo
+
+            ```bash
+            STATUS_FIELD=$(yq -r '.fields.Status.id' .claude/project-ops.yaml)
+            TODO_OPTION=$(yq -r '.fields.Status.options[] | select(.name == "Todo") | .id' .claude/project-ops.yaml)
+            GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/set-field.sh "$ITEM_ID" "$STATUS_FIELD" singleSelectOptionId "$TODO_OPTION"
+            ```
+
+            ### 5c: Set Priority
+
+            Analyze the issue to determine priority:
+            - **P0 - Critical Path**: Production down, data loss, security vulnerability
+            - **P1 - High**: Blocks other work, significant user impact, regression
+            - **P2 - Medium**: Normal feature work, non-blocking bugs
+            - **P3 - Low**: Nice to have, minor improvements
+            - **P4 - Future**: Backlog, someday/maybe
+
+            ```bash
+            PRIORITY_FIELD=$(yq -r '.fields.Priority.id' .claude/project-ops.yaml)
+            PRIORITY_OPTION=$(yq -r '.fields.Priority.options[] | select(.name == "<PRIORITY_NAME>") | .id' .claude/project-ops.yaml)
+            GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/set-field.sh "$ITEM_ID" "$PRIORITY_FIELD" singleSelectOptionId "$PRIORITY_OPTION"
+            ```
+
+            ### 5d: Set Critical Path
+
+            ```bash
+            CP_FIELD=$(yq -r '.fields."Critical Path".id' .claude/project-ops.yaml)
+            CP_OPTION=$(yq -r '.fields."Critical Path".options[] | select(.name == "<CRITICAL_PATH_NAME>") | .id' .claude/project-ops.yaml)
+            GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/set-field.sh "$ITEM_ID" "$CP_FIELD" singleSelectOptionId "$CP_OPTION"
+            ```
+
+            ### 5e: Set Sprint
+
+            - P0/P1: Current sprint
+            - P2: Current or next sprint
+            - P3/P4: Do not assign a sprint
+
+            ```bash
+            GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/get-iterations.sh
+            SPRINT_FIELD=$(yq -r '.fields.Sprint.id' .claude/project-ops.yaml)
+            GH_TOKEN=$GH_PROJECTS_PAT ./scripts/project/set-field.sh "$ITEM_ID" "$SPRINT_FIELD" iterationId "<SPRINT_ITERATION_ID>"
+            ```
+
+            ### 5f: Set Start Date and Target Date (if inferable)
+
+            Only set these if the issue has clear time constraints mentioned.
+
+            ## Step 6: Epic & Sub-Issue Wiring
+
+            Using Sub-agent C's results:
+
+            ### If a matching parent epic exists:
+            ```bash
+            gh api graphql -f query='
+              mutation($epicId: ID!, $subIssueId: ID!) {
+                addSubIssue(input: { issueId: $epicId subIssueId: $subIssueId }) { issue { number title } }
+              }' -f epicId="<EPIC_NODE_ID>" -f subIssueId="<THIS_ISSUE_NODE_ID>"
+            ```
+
+            ### If no matching parent epic exists:
+            1. Create a new epic issue with `mcp__github__issue_write`
+            2. Add the new epic to the project board (same steps as 5a-5d)
+            3. Wire this issue as a sub-issue of the new epic
+
+            ## Step 7: Blocker Evaluation
+
+            Search for OPEN issues in the same area that might block this issue and document blocking relationships via comments.
+
+            ## Important Guidelines
+
+            - DO NOT attempt to resolve the issue or write code
+            - DO NOT close the issue
+            - Be conservative with blocker relationships
+            - When creating epics, keep them focused (5-10 sub-issues max)
+            - If re-triaging, update existing board fields rather than adding duplicates
+            - Remove the `needs-triage` label after processing
+            - If it makes sense, leave a comment on the issue with your analysis
