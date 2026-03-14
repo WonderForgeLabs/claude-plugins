@@ -1,0 +1,96 @@
+name: PR Review with Progress Tracking
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  review-with-tracking:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
+      issues: read
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          lfs: true
+
+      - name: PR Review with Progress Tracking
+        uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "claude[bot],copilot[bot]"
+          claude_args: |
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(gh:*),Bash(jq:*),Bash(yq:*),Bash(shellcheck:*),Bash(docker:*)" --model "claude-opus-4-6"
+
+          # Enable progress tracking
+          track_progress: true
+
+          # Review instructions
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            ## Review Process
+
+            Perform a comprehensive code review with the following focus areas:
+
+            1. **Plugin Structure**
+               - Valid plugin.json manifest (name, version, description, author, keywords)
+               - Correct directory layout (.claude-plugin/, skills/, commands/, hooks/, defaults/)
+               - Naming conventions (kebab-case, matching names across files)
+
+            2. **Hook Quality**
+               - Hooks use `Edit|Write|MultiEdit` matchers (not missing MultiEdit)
+               - Hook commands are extracted to scripts (not long inline one-liners)
+               - Scripts read config from `.claude/{plugin-name}/config.yaml` via yq
+               - Config bootstrap: auto-copy defaults if config missing
+               - yq resolution: native yq, then Docker fallback, then graceful exit
+               - All hooks exit 0 on non-fatal conditions (never block Claude)
+
+            3. **Config Pattern**
+               - `defaults/config.yaml` ships with plugin and contains sensible defaults
+               - Config is bootstrapped on first hook/command run
+               - Config values are read via yq piped through stdin
+               - Docker yq fallback works without volume mounts
+
+            4. **Skill & Command Quality**
+               - Skills have proper frontmatter (name, description)
+               - Commands have frontmatter (description, allowed-tools, argument-hint)
+               - Skills reference config values instead of hardcoded paths
+               - Commands pass $ARGUMENTS correctly
+
+            5. **Security**
+               - No hardcoded credentials, tokens, or secrets
+               - No destructive operations without confirmation
+               - Proper input parsing via jq with `// empty` fallback
+               - No insecure HTTP URLs
+
+            6. **Documentation**
+               - README covers: install, usage, configuration, requirements, files
+               - Configuration section documents config file location and all options
+               - Requirements lists yq/Docker dependency
+
+            7. **Feedback Standards**
+               - Treat ALL feedback as important — never minimize findings with phrases like "minor observation", "nit", or "optional"
+               - Every piece of feedback must be clearly actionable
+
+            ## Output
+
+            Provide detailed inline comments on the PR for specific code issues.
+            Use a top-level summary comment listing all findings grouped by concern.
+
+            Do NOT create GitHub issues — use the `claude-make-follow-up-issues` label on the PR to trigger follow-up issue creation separately.
+
+# When track_progress is enabled:
+# - Creates a tracking comment with progress checkboxes
+# - Includes all PR context (comments, attachments, images)
+# - Updates progress as the review proceeds
+# - Marks as completed when done

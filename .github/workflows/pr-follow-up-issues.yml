@@ -1,0 +1,143 @@
+name: Create Follow-Up Issues from PR
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: pr-follow-up-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  create-follow-up-issues:
+    if: github.event.label.name == 'claude-make-follow-up-issues'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
+      issues: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Create Follow-Up Issues
+        uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_NAME: ${{ github.repository }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "claude[bot],copilot[bot]"
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(git:*),Bash(gh:*),mcp__github__issue_write,mcp__github__add_issue_comment,mcp__github__update_issue,mcp__github__search_issues" --model "claude-opus-4-6"
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            ## Task: Create Follow-Up Issues from PR Review Feedback
+
+            Read ALL review comments and inline review comments on this PR:
+            1. Use `gh pr view ${PR_NUMBER} --repo ${REPO_NAME} --comments` to get top-level comments
+            2. Use `gh api --paginate repos/${REPO_NAME}/pulls/${PR_NUMBER}/comments` to get inline review comments
+            3. Use `gh api --paginate repos/${REPO_NAME}/pulls/${PR_NUMBER}/reviews` to get review bodies
+
+            ## Feedback Grouping
+
+            Group all review findings into small, logically related chunks optimized for concurrent fixes. This prevents merge conflicts when multiple people address feedback simultaneously.
+
+            ### Grouping Rules
+
+            1. **Semantic grouping first:** Group findings by concern (e.g., "hook config pattern", "README updates", "script quality", "security hardening").
+
+            2. **Conflict-awareness pass:** After grouping, check if any two groups touch the SAME files. If they do:
+               - Merge the groups if they're related enough
+               - OR add a sequencing note: "Fix Group X before Group Y (both touch `path/to/file`)"
+
+            3. **Each group must be self-contained:** A developer should be able to fix one group without needing context from another group.
+
+            4. **Keep groups small:** 1-5 findings per group. Prefer more groups over fewer large ones.
+
+            ### Deduplication (IMPORTANT)
+
+            Before creating any issues, search for existing feedback issues from prior runs:
+            ```
+            mcp__github__search_issues with query: "repo:${REPO_NAME} is:issue is:open label:pr-feedback \"[PR #${PR_NUMBER} feedback]\" in:title"
+            ```
+
+            If existing feedback issues are found for this PR:
+            - Close any that are no longer relevant (findings fixed by the latest push)
+            - Update existing issues if the findings still apply but details changed
+            - Only create NEW issues for genuinely new findings not covered by existing issues
+            - Do NOT create duplicate issues for the same finding
+
+            ### Output: Create GitHub Issues
+
+            For each NEW feedback group, create a separate GitHub issue:
+
+            **Title format:** `[PR #${PR_NUMBER} feedback] <group description>`
+
+            **Body format:**
+            ```
+            ## Context
+            PR: #<PR_NUMBER> — <PR title>
+            Branch: `<branch_name>`
+
+            ## Findings
+
+            ### 1. <finding title>
+            **File:** `path/to/file:42`
+            **Issue:** <description of the problem>
+            **Suggested fix:** <specific actionable suggestion or code>
+
+            ### 2. <finding title>
+            ...
+
+            ## Files Touched
+            - `path/to/file1`
+            - `path/to/file2`
+
+            ## Conflict Notes
+            <Either "This group is independent and can be fixed concurrently with all other groups."
+             OR "Fix this group AFTER group [X] — both touch `path/to/shared-file`.">
+            ```
+
+            **Labels:** Apply `pr-feedback` plus any relevant `area:*` labels matching the files in the group.
+
+            ### Delegate Issue Creation
+
+            After you have completed the review and grouping, delegate the creation of individual GitHub issues to Sonnet sub-agents in parallel (one sub-agent per group). Provide each sub-agent with the exact title, body, and labels.
+
+            ### Summary Comment
+
+            After all feedback issues are created, post a single summary comment on the PR listing:
+            - Total number of findings
+            - Number of groups created
+            - Links to each created issue with its group title
+            - Which groups can be fixed concurrently vs. which need sequencing
+
+  remove-label:
+    needs: create-follow-up-issues
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Remove trigger label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr edit "$PR_NUMBER" \
+            --remove-label "claude-make-follow-up-issues" \
+            --repo "$REPO"

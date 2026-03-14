@@ -1,0 +1,12 @@
+{
+  "name": "aspire-bisect",
+  "version": "1.0.0",
+  "description": "Bisect .NET Aspire NuGet daily builds to pinpoint regressions. Uses git worktrees, adaptive sampling, and DCP log collection.",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/claude-plugins",
+  "license": "MIT",
+  "keywords": ["dotnet", "aspire", "bisect", "nuget", "regression", "debugging"]
+}
