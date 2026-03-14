@@ -30,6 +30,18 @@
         "url": "https://github.com/WonderForgeLabs"
       },
       "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/aspire-dev"
+    },
+    {
+      "name": "pr-feedback-sweep",
+      "description": "Scan open PRs for unresolved review feedback and dispatch fix agents. Works with any GitHub repository.",
+      "version": "1.0.0",
+      "source": "./plugins/pr-feedback-sweep",
+      "category": "development",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/pr-feedback-sweep"
     }
   ]
 }
