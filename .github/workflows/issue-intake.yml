@@ -5,7 +5,7 @@ on:
     types: [opened, labeled]
 
 concurrency:
-  group: issue-intake-${{ github.event.issue.number }}
+  group: issue-intake-${{ github.event.issue.number }}-${{ github.event.action }}
   cancel-in-progress: true
 
 jobs:
