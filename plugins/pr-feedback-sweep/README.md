@@ -37,6 +37,7 @@ Or trigger it naturally by asking Claude to "check PRs for feedback", "sweep PR 
 
 - GitHub CLI (`gh`) authenticated
 - Git
+- GitHub MCP server plugin (optional -- used as fallback when GitHub API rate limit is hit)
 
 ## Rate Limit Handling
 

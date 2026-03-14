@@ -1,7 +1,6 @@
 ---
 name: pr-feedback-sweep
 description: Fetch all unresolved review feedback across open PRs and dispatch fix agents
-disable-model-invocation: true
 ---
 
 # PR Feedback Sweep

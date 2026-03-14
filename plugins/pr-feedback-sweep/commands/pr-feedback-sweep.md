@@ -1,6 +1,7 @@
 ---
 name: pr-feedback-sweep
 description: Scan open PRs for unresolved feedback and dispatch fix agents
+argument-hint: "[PR numbers...] [--all]"
 allowed-tools: ["Bash", "Read", "Agent", "Glob", "Grep"]
 ---
 
