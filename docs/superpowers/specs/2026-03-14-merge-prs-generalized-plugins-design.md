@@ -71,12 +71,16 @@ else
 fi
 
 # Usage — always pipe the file via stdin:
-VALUE=$(cat "$CONFIG_FILE" | $YQ '.some.key')
-# For list reads that may be empty, append "// []" to avoid null/empty-output exit codes:
+VALUE=$(cat "$CONFIG_FILE" | $YQ '.some.key // "default"')
+# For list reads that may be empty, intentionally swallow parse errors — hooks must never block:
 ITEMS=$(cat "$CONFIG_FILE" | $YQ '.some.list[] // ""' 2>/dev/null || true)
 ```
 
 Piping via stdin means `docker run --rm -i mikefarah/yq` works without any `-v` volume mount, because it reads from stdin rather than a file path argument.
+
+**Null handling:** Always use the yq default operator (`// "default"`) so that `null` output (from missing keys, TOCTOU races where the file vanishes between the guard and the read, or malformed YAML) is treated as a safe default rather than propagated. Hooks must never branch on raw `null`.
+
+**Docker image pull failure:** If Docker is available but the `mikefarah/yq` image is not cached (e.g. air-gapped environment, rate-limited), `docker run` will fail. Since the yq call is wrapped in `2>/dev/null || true` for list reads and hooks exit 0 on non-fatal conditions, this degrades gracefully — the hook skips config-driven logic and exits 0.
 
 Hooks always exit 0 if yq is unavailable — they warn but never block Claude.
 
@@ -141,7 +145,17 @@ jest:
 
 `jest` behaves differently:
 - If the saved file **is itself a test file** (its filename matches any `test_patterns` glob), Jest runs on that file directly.
-- If the saved file is a **non-test source file**, the hook strips only the **last extension** to derive the basename (`Foo.component.tsx` → `Foo.component`). It then searches for a matching test file by trying all combinations of `{dir}/` and `{dir}/__tests__/` with each `test_patterns` entry (8 candidates for the default 4 patterns × 2 locations). The hook stops at the **first existing file found**, checking `{dir}/` before `{dir}/__tests__/` and patterns in config list order. `test_patterns` are matched against the filename only (not the full path). If no candidate exists, the hook exits 0 silently.
+- If the saved file is a **non-test source file**, the hook strips only the **last extension** to derive the stem (`Foo.component.tsx` → `Foo.component`). It then searches for a matching test file by trying all combinations of `{dir}/` and `{dir}/__tests__/` with each `test_patterns` entry (8 candidates for the default 4 patterns × 2 locations). The hook stops at the **first existing file found**, checking `{dir}/` before `{dir}/__tests__/` and patterns in config list order. `test_patterns` are matched against the filename only (not the full path). If no candidate exists, the hook exits 0 silently.
+
+  **Example:** Editing `src/components/Foo.component.tsx` with default patterns produces these candidates in order:
+  1. `src/components/Foo.component.test.ts`
+  2. `src/components/Foo.component.test.tsx`
+  3. `src/components/Foo.component.spec.ts`
+  4. `src/components/Foo.component.spec.tsx`
+  5. `src/components/__tests__/Foo.component.test.ts`
+  6. `src/components/__tests__/Foo.component.test.tsx`
+  7. `src/components/__tests__/Foo.component.spec.ts`
+  8. `src/components/__tests__/Foo.component.spec.tsx`
 - The project root for running Jest is located by walking up from the source file's directory until a `package.json` is found.
 
 No hookify rules — removed entirely from PR #2.
@@ -156,7 +170,7 @@ format:
   sln_discovery_depth: 2
 ```
 
-`sln_discovery_depth` is passed directly as the `find -maxdepth` argument when searching for `.sln`/`.slnx` files under `$CLAUDE_PROJECT_DIR`. A value of `2` means `find "$CLAUDE_PROJECT_DIR" -maxdepth 2 -name '*.sln' -o -name '*.slnx'`, which descends at most 2 directory levels below the project root. If multiple solution files are found, the first result is used. If none are found, `dotnet format` runs without `--sln` (formats the file directly). If `enabled: false`, the hook exits 0 immediately.
+`sln_discovery_depth` is passed directly as the `find -maxdepth` argument when searching for `.sln`/`.slnx` files under `$CLAUDE_PROJECT_DIR`. A value of `2` means `find "$CLAUDE_PROJECT_DIR" -maxdepth 2 -name '*.sln' -o -name '*.slnx'`, which descends at most 2 directory levels below the project root. Results are sorted (`find ... | sort | head -1`) so the shallowest, alphabetically-first solution file is selected deterministically. If none are found, `dotnet format` runs without `--sln` (formats the file directly). If `enabled: false`, the hook exits 0 immediately.
 
 ### adr
 
@@ -184,10 +198,16 @@ The skill reads these paths at runtime so teams can place records wherever their
 ```yaml
 max_prs: 30
 skip_bots: true
-bot_usernames: []
+bot_usernames:
+  - "github-actions[bot]"
+  - "copilot"
+  - "dependabot[bot]"
+  - "renovate[bot]"
+  - "codecov[bot]"
+  - "github-advanced-security[bot]"
 ```
 
-Bootstrap runs as the first step of the skill (slash command, not a hook). `max_prs` caps how many open PRs are fetched in `--all` mode. `skip_bots` filters out comments from a hardcoded list of known bot accounts: `github-actions[bot]`, `copilot`, `dependabot[bot]`, `renovate[bot]`, `codecov[bot]`, `github-advanced-security[bot]`. `bot_usernames` is an additional list for project-specific bots not in the hardcoded set — entries here are merged with the hardcoded list (not a replacement). Set `skip_bots: false` to disable all bot filtering.
+Bootstrap runs as the first step of the skill (slash command, not a hook). `max_prs` caps how many open PRs are fetched in `--all` mode. `skip_bots` enables/disables bot comment filtering. `bot_usernames` is the full list of bot accounts to filter — shipped with sensible defaults that users can freely add to or remove from. Set `skip_bots: false` to disable all bot filtering regardless of the list.
 
 ---
 
