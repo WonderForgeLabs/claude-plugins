@@ -35,9 +35,8 @@ Before doing any work, load configuration values:
 2. **If the config file does not exist, create it from plugin defaults:**
    ```bash
    mkdir -p "$CLAUDE_PROJECT_DIR/.claude/adr"
-   cp "$(dirname "$0")/../../defaults/config.yaml" "$CONFIG_FILE"
    ```
-   If the copy source is unavailable, create the file with these defaults:
+   Copy the plugin's `defaults/config.yaml` to `$CONFIG_FILE`. If the plugin defaults file cannot be located, create the file with these defaults:
    ```yaml
    adr_directory: "docs/adr"
    ddr_directory: "docs/ddr"
