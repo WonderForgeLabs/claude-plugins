@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in *.cs) slnfile=$(find \"$CLAUDE_PROJECT_DIR\" -maxdepth 2 -name '*.sln' -o -name '*.slnx' 2>/dev/null | head -1); [ -n \"$slnfile\" ] && { dotnet format \"$slnfile\" --include \"$FILE_PATH\" --no-restore 2>/dev/null || true; } || { dotnet format --include \"$FILE_PATH\" --no-restore 2>/dev/null || true; };; esac",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/scripts/dotnet-format.sh",
             "timeout": 30,
             "statusMessage": "Formatting C#..."
           }
