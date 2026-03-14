@@ -18,6 +18,18 @@
         "url": "https://github.com/WonderForgeLabs"
       },
       "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/aspire-bisect"
+    },
+    {
+      "name": "aspire-dev",
+      "description": "Comprehensive .NET Aspire development toolkit — orchestration, DCP debugging, and test timeout diagnosis.",
+      "version": "1.0.0",
+      "source": "./plugins/aspire-dev",
+      "category": "development",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/aspire-dev"
     }
   ]
 }
