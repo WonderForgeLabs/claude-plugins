@@ -123,7 +123,7 @@ guards:
     shellcheck_severity: warning
 ```
 
-All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. Since `case` globs match the entire string, patterns like `*.env` will match `foo.env` but **not** `src/config/.env` — use `*/.env` or `*/*.env` for nested paths. The `env_files` defaults above use `*.env` and `*.env.*` which match files ending in `.env` at any depth because the `*` glob crosses path separators in `case` statements. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
+All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. In `case` statements, `*` matches any string **including** path separators — this is different from filename expansion (globbing) where `*` does not cross directories. So `*.env` in a `case` pattern matches both `foo.env` and `src/config/foo.env`. The default `env_files` patterns are therefore correct for catching nested files. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
 
 ### web-quality
 
@@ -226,7 +226,7 @@ Three modes (with one precedence rule) resolved from arguments passed to the sla
 
 ```bash
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-PR_NUMBER=$(gh pr list --head "$BRANCH" --json number -q '.[0].number')
+PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
 ```
 
 If no PR is found for the current branch, the skill informs the user and asks whether to scan all open PRs or exit.
