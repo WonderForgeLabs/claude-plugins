@@ -24,7 +24,7 @@ All configurable plugins follow a single consistent pattern.
 ### Environment variables
 
 - `$CLAUDE_PROJECT_DIR` — root of the user's project (set by Claude Code at hook runtime)
-- `$CLAUDE_PLUGIN_ROOT` — directory where the plugin is installed (set by Claude Code at hook runtime, points to the plugin's own files). This is a standard Claude Code hook variable — hooks for installed plugins receive it automatically.
+- `$CLAUDE_PLUGIN_ROOT` — directory where the plugin is installed (set by Claude Code at hook runtime, points to the plugin's own files). Documented in the [Claude Code hooks reference](https://docs.anthropic.com/en/docs/claude-code/hooks) as a standard environment variable available to plugin hooks. **Validation checkpoint:** confirm this variable is populated before beginning implementation — if it is absent or renamed, the entire config bootstrap pattern must be adapted.
 
 ### Per-project config location
 
@@ -170,7 +170,7 @@ format:
   sln_discovery_depth: 2
 ```
 
-`sln_discovery_depth` is passed directly as the `find -maxdepth` argument when searching for `.sln`/`.slnx` files under `$CLAUDE_PROJECT_DIR`. A value of `2` means `find "$CLAUDE_PROJECT_DIR" -maxdepth 2 -name '*.sln' -o -name '*.slnx'`, which descends at most 2 directory levels below the project root. Results are sorted (`find ... | sort | head -1`) so the shallowest, alphabetically-first solution file is selected deterministically. If none are found, `dotnet format` runs without `--sln` (formats the file directly). If `enabled: false`, the hook exits 0 immediately.
+`sln_discovery_depth` is passed directly as the `find -maxdepth` argument when searching for `.sln`/`.slnx` files under `$CLAUDE_PROJECT_DIR`. A value of `2` means `find "$CLAUDE_PROJECT_DIR" -maxdepth 2 \( -name '*.sln' -o -name '*.slnx' \)`, which descends at most 2 directory levels below the project root. Results are sorted (`find ... | sort | head -1`) so the shallowest, alphabetically-first solution file is selected deterministically. If none are found, `dotnet format` runs without `--sln` (formats the file directly). If `enabled: false`, the hook exits 0 immediately.
 
 ### adr
 
@@ -187,7 +187,7 @@ ddr_directory: "docs/ddr"
 numbering_format: "%04d"
 ```
 
-`numbering_format` is a `printf`-style format string applied to the auto-incremented record number (e.g. `%04d` → `0001`, `0002`). No validation is performed — invalid format strings (e.g. `%s`) degrade silently to whatever `printf` produces.
+`numbering_format` is a `printf`-style format string applied to the auto-incremented record number (e.g. `%04d` → `0001`, `0002`). The format string must contain `%d` or `%0Nd` — if it doesn't (e.g. `%s`), `printf "%s" 1` produces `1` without zero-padding, which breaks filename ordering (record 10 would sort before record 2). Implementers should validate at read time: if the format doesn't match `%[0-9]*d`, fall back to the default `%04d`.
 
 The skill reads these paths at runtime so teams can place records wherever their project conventions require.
 
