@@ -48,7 +48,7 @@ format:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `format.enabled` | bool | `true` | Enable or disable C# auto-formatting |
-| `format.sln_discovery_depth` | int | `2` | Max directory depth to search for `.sln`/`.slnx` files |
+| `format.sln_discovery_depth` | int | `2` | Max directory depth below the project root to search for `.sln`/`.slnx` files |
 
 To disable formatting, set `format.enabled` to `false` in your config file. To search deeper for solution files in nested project structures, increase `sln_discovery_depth`.
 
