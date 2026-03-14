@@ -1,5 +1,5 @@
 max_prs: 30
-skip_bots: true
+skip_bots: false
 bot_usernames:
   - "github-actions[bot]"
   - "copilot"

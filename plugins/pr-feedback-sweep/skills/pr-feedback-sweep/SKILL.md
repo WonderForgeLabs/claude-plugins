@@ -26,7 +26,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # Inline fallback
     cat > "$CONFIG_FILE" <<'YAML'
 max_prs: 30
-skip_bots: true
+skip_bots: false
 bot_usernames:
   - "github-actions[bot]"
   - "copilot"
@@ -55,12 +55,12 @@ fi
 
 if [ -n "$YQ" ]; then
   MAX_PRS=$($YQ '.max_prs // 30' "$CONFIG_FILE")
-  SKIP_BOTS=$($YQ '.skip_bots // true' "$CONFIG_FILE")
+  SKIP_BOTS=$($YQ '.skip_bots // false' "$CONFIG_FILE")
   BOT_USERNAMES=$($YQ '.bot_usernames // [] | .[]' "$CONFIG_FILE")
 else
   MAX_PRS=30
-  SKIP_BOTS=true
-  BOT_USERNAMES=""
+  SKIP_BOTS=false
+  BOT_USERNAMES="github-actions[bot] copilot dependabot[bot] renovate[bot] codecov[bot] github-advanced-security[bot]"
 fi
 ```
 
