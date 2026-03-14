@@ -4,7 +4,11 @@ guards:
     patterns:
       - "*.env"
       - "*.env.*"
-      - "*secrets*"
+      - "*secrets.json"
+      - "*secrets.yaml"
+      - "*secrets.yml"
+      - "*secrets.env"
+      - "*.secret"
       - "*.env.local"
   generated_code:
     enabled: true
