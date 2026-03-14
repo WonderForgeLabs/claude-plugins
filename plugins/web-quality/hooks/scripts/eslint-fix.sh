@@ -26,7 +26,7 @@ ENABLED=$($YQ '.eslint.enabled' < "$CONFIG_FILE")
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read extensions list
-EXTENSIONS=$($YQ '.eslint.extensions[]' < "$CONFIG_FILE")
+EXTENSIONS=$($YQ '.eslint.extensions[]' < "$CONFIG_FILE" | tr -d '"')
 
 # Get file extension
 EXT=".${FILE_PATH##*.}"

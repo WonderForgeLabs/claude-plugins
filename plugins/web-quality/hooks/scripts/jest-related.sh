@@ -26,7 +26,7 @@ ENABLED=$($YQ '.jest.enabled' < "$CONFIG_FILE")
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read test patterns
-PATTERNS=$($YQ '.jest.test_patterns[]' < "$CONFIG_FILE")
+PATTERNS=$($YQ '.jest.test_patterns[]' < "$CONFIG_FILE" | tr -d '"')
 
 # Check if the file IS a test file (basename matches any test_pattern glob)
 BASENAME=$(basename "$FILE_PATH")

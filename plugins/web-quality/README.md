@@ -22,6 +22,8 @@ claude plugin install web-quality@wonderforgelabs-plugins
 | TypeScript check | Runs `tsc --noEmit` | Any `.ts`/`.tsx` edit |
 | Jest auto-run | Runs related test file if it exists | Source or test file edit |
 
+> **Jest search scope:** When a source file is edited, the plugin looks for a matching test file only in the same directory and its `__tests__/` subdirectory. Projects that keep tests in other locations (e.g. a top-level `tests/` directory) won't trigger auto-run. You can still trigger it by editing the test file directly.
+
 ## Files
 
 | Path | Purpose |

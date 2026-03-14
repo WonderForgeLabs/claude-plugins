@@ -26,7 +26,7 @@ ENABLED=$($YQ '.typescript.enabled' < "$CONFIG_FILE")
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read extensions list
-EXTENSIONS=$($YQ '.typescript.extensions[]' < "$CONFIG_FILE")
+EXTENSIONS=$($YQ '.typescript.extensions[]' < "$CONFIG_FILE" | tr -d '"')
 
 # Get file extension
 EXT=".${FILE_PATH##*.}"
