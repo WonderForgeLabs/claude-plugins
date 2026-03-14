@@ -1,0 +1,3 @@
+max_prs: 30
+skip_bots: true
+bot_usernames: []
