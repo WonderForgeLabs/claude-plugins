@@ -28,7 +28,33 @@ claude plugin install code-guards@wonderforgelabs-plugins
 |-------|------|---------|
 | Shell linting | shellcheck | Catches shell script issues after editing |
 
+## Configuration
+
+On first hook run, the plugin copies its default config to your project at:
+
+```
+.claude/code-guards/config.yaml
+```
+
+You can edit this file to customize guard behavior:
+
+- **Add or remove patterns** per guard to match your project structure
+- **Disable a guard entirely** by setting `enabled: false`
+- **Adjust shellcheck severity** via `shellcheck_severity` (error, warning, info, style)
+
+The config is per-project, so each repo can have its own rules.
+
+## Files
+
+| Path | Purpose |
+|------|---------|
+| `defaults/config.yaml` | Default guard patterns and settings, copied to project on first run |
+| `hooks/hooks.json` | Hook definitions that wire guards to PreToolUse/PostToolUse events |
+| `hooks/scripts/guard-check.sh` | Generic guard script that reads patterns from config and blocks matching files |
+| `hooks/scripts/shellcheck-guard.sh` | Runs shellcheck on `.sh` files with config-driven severity |
+
 ## Requirements
 
 - `jq` (required, used to parse hook stdin JSON)
+- `yq` (required, or Docker with `mikefarah/yq` image as fallback)
 - `shellcheck` (optional, skips gracefully if not installed)

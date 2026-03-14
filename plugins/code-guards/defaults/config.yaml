@@ -1,0 +1,31 @@
+guards:
+  env_files:
+    enabled: true
+    patterns:
+      - "*.env"
+      - "*.env.*"
+      - "*secrets*"
+      - "*.env.local"
+  generated_code:
+    enabled: true
+    patterns:
+      - "*/Generated/*"
+      - "*/obj/*"
+      - "*/bin/*"
+      - "*/dist/*"
+      - "*/build/*"
+  lock_files:
+    enabled: true
+    patterns:
+      - "*/yarn.lock"
+      - "*/package-lock.json"
+      - "*/packages.lock.json"
+      - "*/pnpm-lock.yaml"
+      - "*/Cargo.lock"
+      - "*/go.sum"
+      - "*/poetry.lock"
+      - "*/Gemfile.lock"
+      - "*/composer.lock"
+  shell_scripts:
+    enabled: true
+    shellcheck_severity: warning
