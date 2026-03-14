@@ -22,13 +22,6 @@ claude plugin install web-quality@wonderforgelabs-plugins
 | TypeScript check | Runs `tsc --noEmit` | Any `.ts`/`.tsx` edit |
 | Jest auto-run | Runs related test file if it exists | Source file edit (skips test files) |
 
-### Hookify Rules (warnings)
-
-| Rule | What | When |
-|------|------|------|
-| Console log warning | Warns about `console.log()` in production code | Non-test TS/JS files |
-| Any type warning | Warns about TypeScript `any` type usage | Any `.ts`/`.tsx` file |
-
 ## Requirements
 
 - `jq` (for parsing hook stdin JSON)
