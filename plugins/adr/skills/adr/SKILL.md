@@ -23,16 +23,48 @@ Create properly formatted Architecture Decision Records (ADRs) or Domain Decisio
 /adr ddr Artifact versioning strategy
 ```
 
+## Configuration Bootstrap
+
+Before doing any work, load configuration values:
+
+1. **Check for project config:**
+   ```bash
+   CONFIG_FILE="$CLAUDE_PROJECT_DIR/.claude/adr/config.yaml"
+   ```
+
+2. **If the config file does not exist, create it from plugin defaults:**
+   ```bash
+   mkdir -p "$CLAUDE_PROJECT_DIR/.claude/adr"
+   cp "$(dirname "$0")/../../defaults/config.yaml" "$CONFIG_FILE"
+   ```
+   If the copy source is unavailable, create the file with these defaults:
+   ```yaml
+   adr_directory: "docs/adr"
+   ddr_directory: "docs/ddr"
+   numbering_format: "%04d"
+   ```
+
+3. **Read config values using yq:**
+   ```bash
+   ADR_DIR=$(yq '.adr_directory' "$CONFIG_FILE")
+   DDR_DIR=$(yq '.ddr_directory' "$CONFIG_FILE")
+   NUMBERING_FORMAT=$(yq '.numbering_format' "$CONFIG_FILE")
+   ```
+
+   If `yq` is not in PATH, try `docker run --rm -i mikefarah/yq`. If neither is available, warn the user and use defaults (`docs/adr`, `docs/ddr`, `%04d`).
+
+4. **Use these values throughout the workflow.** All directory references and number formatting below use the config-driven values.
+
 ## Workflow
 
-1. **Determine next number**: Check existing files in `docs/ADR/` or `docs/DDR/`
+1. **Determine next number**: Check existing files in `$ADR_DIR` or `$DDR_DIR` (from config). Format the number using `$NUMBERING_FORMAT` (e.g., `printf "$NUMBERING_FORMAT" $NEXT_NUM`).
 2. **Gather context**: Ask clarifying questions about:
    - What problem are we solving?
    - What constraints exist?
    - What alternatives were considered?
 3. **Generate the document** using the appropriate template
 
-## ADR Template (docs/ADR/)
+## ADR Template ($ADR_DIR/)
 
 For technical/architecture decisions:
 
@@ -89,7 +121,7 @@ Proposed
 **Next Review:** YYYY-MM-DD (6 months)
 ```
 
-## DDR Template (docs/DDR/)
+## DDR Template ($DDR_DIR/)
 
 For domain/user experience decisions:
 
