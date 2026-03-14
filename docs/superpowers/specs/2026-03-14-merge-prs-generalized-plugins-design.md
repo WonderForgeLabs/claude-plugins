@@ -123,7 +123,7 @@ guards:
     shellcheck_severity: warning
 ```
 
-All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
+All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. Since `case` globs match the entire string, patterns like `*.env` will match `foo.env` but **not** `src/config/.env` — use `*/.env` or `*/*.env` for nested paths. The `env_files` defaults above use `*.env` and `*.env.*` which match files ending in `.env` at any depth because the `*` glob crosses path separators in `case` statements. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
 
 ### web-quality
 
@@ -156,7 +156,7 @@ jest:
   6. `src/components/__tests__/Foo.component.test.tsx`
   7. `src/components/__tests__/Foo.component.spec.ts`
   8. `src/components/__tests__/Foo.component.spec.tsx`
-- The project root for running Jest is located by walking up from the source file's directory until a `package.json` is found.
+- The project root for running Jest is located by walking up from the source file's directory until a `package.json` is found. The walk-up stops at `$CLAUDE_PROJECT_DIR` — if no `package.json` is found within that boundary, the hook exits 0.
 
 No hookify rules — removed entirely from PR #2.
 
@@ -213,7 +213,7 @@ Bootstrap runs as the first step of the skill (slash command, not a hook). `max_
 
 ## pr-feedback-sweep Command Targeting
 
-Three modes resolved from arguments passed to the slash command:
+Three modes (with one precedence rule) resolved from arguments passed to the slash command:
 
 | Invocation | Behavior |
 |---|---|
