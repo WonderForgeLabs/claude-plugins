@@ -4,7 +4,7 @@
 
 | Signal | Confidence | Detection |
 |--------|------------|-----------|
-| Commit on main references issue number | High | `git log main --grep="#{NUMBER}"` |
+| Commit on main references issue number | High | `git log $DEFAULT_BRANCH --grep="#{NUMBER}"` |
 | Linked PR was merged | High | `gh api repos/{REPO}/issues/{NUMBER}/timeline` cross-references with merged PRs |
 | Code described in issue exists on main | Medium | Grep for feature/function names from issue body |
 | Issue author commented "done" or "fixed" | Medium | Parse issue comments for acknowledgement |

@@ -5,7 +5,7 @@
 | Signal | Severity | Detection |
 |--------|----------|-----------|
 | Age > 30 days with no updates | High | `createdAt` / `updatedAt` delta |
-| Behind main by 50+ commits | High | `gh api repos/{REPO}/compare/main...{BRANCH} --jq .behind_by` |
+| Behind default branch by 50+ commits | High | `gh api repos/{REPO}/compare/{DEFAULT_BRANCH}...{BRANCH} --jq .behind_by` |
 | Merge conflicts present | Medium | `mergeable: CONFLICTING` from `gh pr view` |
 | No CI checks passing | Medium | `gh pr checks {NUMBER}` shows failures |
 | Author has not responded in 14+ days | Medium | Last comment timestamp from author |
@@ -15,11 +15,11 @@
 
 | Signal | Detection |
 |--------|-----------|
-| Same files modified on main after PR creation | `git log main --since={CREATED} -- {FILES}` has hits |
+| Same files modified on main after PR creation | `git log $DEFAULT_BRANCH --since={CREATED} -- {FILES}` has hits |
 | Same function/class names exist with different implementation | Grep main for identifiers from the PR diff |
 | Feature flag referenced in PR was removed from main | Grep for flag name, absent on main |
 | PR description references a design that changed | Manual assessment — compare PR goals to current code |
-| Another PR merged that addresses the same issue | `git log main --grep="#{ISSUE}"` or linked issue has merged PR |
+| Another PR merged that addresses the same issue | `git log $DEFAULT_BRANCH --grep="#{ISSUE}"` or linked issue has merged PR |
 
 ## Bot PR Patterns
 

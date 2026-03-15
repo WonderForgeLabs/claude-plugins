@@ -1,5 +1,7 @@
 {
   "enabledPlugins": {
-    "pr-feedback-sweep@wonderforgelabs-plugins": true
+    "pr-feedback-sweep@wonderforgelabs-plugins": true,
+    "work-triage@wonderforgelabs-plugins": true,
+    "project-ops@wonderforgelabs-plugins": true
   }
 }

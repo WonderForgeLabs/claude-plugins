@@ -11,13 +11,14 @@ Evaluate open PRs to determine which are stale, superseded, conflicted, or ready
 
 ## Setup
 
-### Detect Repository
+### Detect Repository and Default Branch
 
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)
 ```
 
-All commands in this workflow use `$REPO`.
+All commands in this workflow use `$REPO` and `$DEFAULT_BRANCH` (instead of hardcoding `main`).
 
 ### Check for Issue Intake Automation
 
@@ -54,9 +55,9 @@ If both explicit numbers and `--all` are given, explicit numbers take precedence
 For each PR in the target list, gather metadata:
 
 ```bash
-# How far behind main (base=main, head=branch, behind_by = commits on main not on branch)
+# How far behind default branch (behind_by = commits on default branch not on branch)
 BRANCH=$(gh pr view {NUMBER} --json headRefName -q .headRefName)
-gh api "repos/$REPO/compare/main...$BRANCH" --jq '.behind_by' 2>/dev/null || echo "unknown"
+gh api "repos/$REPO/compare/$DEFAULT_BRANCH...$BRANCH" --jq '.behind_by' 2>/dev/null || echo "unknown"
 
 # Mergeable status
 gh pr view {NUMBER} --repo "$REPO" --json mergeable -q .mergeable
@@ -85,13 +86,13 @@ Dispatch one agent per PR using the Agent tool. Each agent MUST use `isolation: 
 
 **Each agent receives these instructions** (substitute all `{PLACEHOLDERS}` with actual values before dispatching):
 
-> You are evaluating PR #{NUMBER} (`{BRANCH}`) for staleness against main.
+> You are evaluating PR #{NUMBER} (`{BRANCH}`) for staleness against `{DEFAULT_BRANCH}`.
 >
 > 1. **Check rebase feasibility:**
 >    ```bash
->    git fetch origin {BRANCH} main
+>    git fetch origin {BRANCH} {DEFAULT_BRANCH}
 >    git checkout {BRANCH}
->    git rebase origin/main 2>&1 || true
+>    git rebase origin/$DEFAULT_BRANCH 2>&1 || true
 >    git rebase --abort 2>/dev/null || true
 >    ```
 >    Record: clean rebase or conflict count/files.
@@ -99,20 +100,20 @@ Dispatch one agent per PR using the Agent tool. Each agent MUST use `isolation: 
 > 2. **Read the PR diff and extract files:**
 >    ```bash
 >    gh pr diff {NUMBER} --repo {REPO}
->    FILES=$(gh pr diff {NUMBER} --repo {REPO} --name-only)
+>    FILES=$(gh pr view {NUMBER} --repo {REPO} --json files --jq '.files[].path')
 >    ```
 >    Identify the key files, functions, and classes modified.
 >
-> 3. **Check for overlapping changes on main:**
+> 3. **Check for overlapping changes on `{DEFAULT_BRANCH}`:**
 >    ```bash
 >    # Get PR creation date
 >    CREATED=$(gh pr view {NUMBER} --repo {REPO} --json createdAt -q .createdAt)
->    # Find commits on main touching the same files since PR was created
->    git log origin/main --since="$CREATED" --oneline -- $FILES
+>    # Find commits on default branch touching the same files since PR was created
+>    git log origin/$DEFAULT_BRANCH --since="$CREATED" --oneline -- $FILES
 >    ```
 >
-> 4. **Search for the same code on main:**
->    For each function/class name modified in the PR, search main using Grep.
+> 4. **Search for the same code on `{DEFAULT_BRANCH}`:**
+>    For each function/class name modified in the PR, search `{DEFAULT_BRANCH}` using Grep.
 >    Note: also check `git log --diff-filter=R -- {FILE}` for renamed files.
 >    This detects if the work landed via a different PR.
 >
@@ -139,7 +140,7 @@ Dispatch one agent per PR using the Agent tool. Each agent MUST use `isolation: 
 >
 > 8. **Report back** with:
 >    - Status: `clean` | `minor-conflicts` | `major-conflicts`
->    - Overlap: description of what landed on main
+>    - Overlap: description of what landed on default branch
 >    - Completion: percentage complete if partially done, what remains
 >    - Review state: approved / changes-requested / pending
 >    - Recommendation: one of `close-completed`, `close-superseded`, `rework`, `split`, `rebase-and-merge`, `keep`
@@ -191,7 +192,7 @@ When a PR is recommended for splitting, walk the user through the process intera
 
 4. **For each approved split, create the branch and PR:**
    Ask the user for permission before each step:
-   - Create a new branch from main
+   - Create a new branch from the default branch
    - Cherry-pick or apply relevant changes
    - Push and create a new PR linking to the original
    - Add a comment on the original PR referencing the splits

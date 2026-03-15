@@ -11,13 +11,14 @@ Evaluate open issues to determine which are completed, stale, blocked, or still 
 
 ## Setup
 
-### Detect Repository
+### Detect Repository and Default Branch
 
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)
 ```
 
-All commands in this workflow use `$REPO`.
+All commands in this workflow use `$REPO` and `$DEFAULT_BRANCH` (instead of hardcoding `main`).
 
 ### Check for Issue Intake Automation
 
@@ -115,9 +116,9 @@ Dispatch one agent per issue (or batch of small issues) using the Agent tool. Ea
 > 2. **Search for references in git history:**
 >    ```bash
 >    # Commits referencing this issue number
->    git log origin/main --all --oneline --grep="#{NUMBER}" | head -20
+>    git log origin/$DEFAULT_BRANCH --all --oneline --grep="#{NUMBER}" | head -20
 >    # Separate search for title keywords (OR semantics with multiple --grep)
->    git log origin/main --all --oneline --grep="{KEYWORD1}" --grep="{KEYWORD2}" | head -20
+>    git log origin/$DEFAULT_BRANCH --all --oneline --grep="{KEYWORD1}" --grep="{KEYWORD2}" | head -20
 >    ```
 >
 > 3. **Check linked PRs:**
