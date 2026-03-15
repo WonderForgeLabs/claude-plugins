@@ -50,7 +50,8 @@ The config is per-project, so each repo can have its own rules.
 |------|---------|
 | `defaults/config.yaml` | Default guard patterns and settings, copied to project on first run |
 | `hooks/hooks.json` | Hook definitions that wire guards to PreToolUse/PostToolUse events |
-| `hooks/scripts/guard-check.sh` | Generic guard script that reads patterns from config and blocks matching files |
+| `hooks/scripts/_common.sh` | Shared config bootstrap and yq resolution sourced by hook scripts |
+| `hooks/scripts/guard-check.sh` | Checks all enabled guards against file paths and blocks matching files |
 | `hooks/scripts/shellcheck-guard.sh` | Runs shellcheck on `.sh` files with config-driven severity |
 
 ## Requirements

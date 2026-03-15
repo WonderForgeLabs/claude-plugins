@@ -11,6 +11,9 @@ guards:
       - "*.secret"
   generated_code:
     enabled: true
+    # NOTE: */bin/*, */build/*, */dist/* may match legitimate source paths
+    # in some projects (e.g. Rust src/bin/, build scripts). Review and
+    # adjust these patterns per project as needed.
     patterns:
       - "*/Generated/*"
       - "*/obj/*"
