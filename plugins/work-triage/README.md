@@ -35,6 +35,19 @@ Or trigger naturally: "triage PRs", "check stale PRs", "clean up PRs", "are thes
 
 Or trigger naturally: "triage issues", "groom backlog", "check stale issues", "are these issues still relevant"
 
+### Setup
+
+```
+/work-triage:setup                   # Interactive wizard to bootstrap automation
+/work-triage:setup --skip-board      # Skip project board check
+```
+
+Installs GitHub Actions workflows (issue intake, reopen audit) and project board helper scripts. Walks you through project board configuration and secrets setup.
+
+## Philosophy
+
+See [`references/how-we-work.md`](references/how-we-work.md) for the philosophy behind this plugin — the work graph model, lifecycle loop, automation conventions, and triage-as-graph-traversal principle.
+
 ## What It Does
 
 ### PR Triage (4 phases)
@@ -66,3 +79,7 @@ Or trigger naturally: "triage issues", "groom backlog", "check stale issues", "a
 | `skills/issue-triage/references/evaluation-criteria.md` | Issue evaluation decision matrix and signals |
 | `commands/pr-triage.md` | `/pr-triage` slash command |
 | `commands/issue-triage.md` | `/issue-triage` slash command |
+| `commands/setup.md` | `/work-triage:setup` interactive wizard |
+| `references/how-we-work.md` | Philosophy and work model guide |
+| `templates/workflows/` | GitHub Actions workflow templates |
+| `templates/scripts/project/` | Project board helper scripts |
