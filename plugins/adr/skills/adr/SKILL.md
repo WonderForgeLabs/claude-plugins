@@ -43,16 +43,29 @@ Before doing any work, load configuration values:
    numbering_format: "%04d"
    ```
 
-3. **Read config values using yq:**
+3. **Resolve yq:**
    ```bash
-   ADR_DIR=$(yq '.adr_directory' "$CONFIG_FILE")
-   DDR_DIR=$(yq '.ddr_directory' "$CONFIG_FILE")
-   NUMBERING_FORMAT=$(yq '.numbering_format' "$CONFIG_FILE")
+   if command -v yq >/dev/null 2>&1; then
+     YQ="yq"
+   elif command -v docker >/dev/null 2>&1; then
+     YQ="docker run --rm -i mikefarah/yq"
+   else
+     echo "Warning: yq not found and docker not available. Install yq: https://github.com/mikefarah/yq" >&2
+     # Use defaults
+     ADR_DIR="docs/adr"
+     DDR_DIR="docs/ddr"
+     NUMBERING_FORMAT="%04d"
+   fi
    ```
 
-   If `yq` is not in PATH, try `docker run --rm -i mikefarah/yq`. If neither is available, warn the user and use defaults (`docs/adr`, `docs/ddr`, `%04d`).
+4. **Read config values using yq (only if YQ was resolved):**
+   ```bash
+   ADR_DIR=$(cat "$CONFIG_FILE" | $YQ '.adr_directory // "docs/adr"')
+   DDR_DIR=$(cat "$CONFIG_FILE" | $YQ '.ddr_directory // "docs/ddr"')
+   NUMBERING_FORMAT=$(cat "$CONFIG_FILE" | $YQ '.numbering_format // "%04d"')
+   ```
 
-4. **Use these values throughout the workflow.** All directory references and number formatting below use the config-driven values.
+5. **Use these values throughout the workflow.** All directory references and number formatting below use the config-driven values.
 
 ## Workflow
 
