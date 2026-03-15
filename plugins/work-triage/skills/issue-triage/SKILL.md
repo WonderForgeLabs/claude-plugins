@@ -99,7 +99,7 @@ If the user specified explicit issue numbers, `--label`, or `--exclude` flags, p
 
 ### Phase 2: Parallel Evaluation
 
-Before dispatching agents, read `references/evaluation-criteria.md` for the full decision matrix, completion/staleness signal tables, blocked/unblocked detection patterns, and evidence quality standards. Also read `../../references/how-we-work.md` for the philosophy governing these evaluations — especially the principles on graph traversal and partial completion tracking. Incorporate these criteria into agent instructions.
+Before dispatching agents, read `references/evaluation-criteria.md` for the full decision matrix, completion/staleness signal tables, blocked/unblocked detection patterns, and evidence quality standards. Also read `${CLAUDE_PLUGIN_ROOT}/references/how-we-work.md` for the philosophy governing these evaluations — especially the principles on graph traversal and partial completion tracking. Incorporate these criteria into agent instructions.
 
 Dispatch one agent per issue (or batch of small issues) using the Agent tool. Each agent needs access to `Bash`, `Read`, `Grep`, and `Glob` tools.
 

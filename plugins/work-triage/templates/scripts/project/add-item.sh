@@ -74,11 +74,11 @@ while :; do
   # jq's select() produces no output when no node matches, which makes
   # head -n 1 return empty. The || true handles SIGPIPE from head when
   # jq closes early; genuine parse errors still print to stderr.
-  ITEM_ID=$(printf '%s' "$RESPONSE" | jq -r "
+  ITEM_ID=$(printf '%s' "$RESPONSE" | jq -r --arg nodeId "$ISSUE_NODE_ID" '
     .data.node.items.nodes[]
-    | select(.content.id == \"$ISSUE_NODE_ID\")
+    | select(.content.id == $nodeId)
     | .id
-  " | head -n 1 || true)
+  ' | head -n 1 || true)
 
   if [ -n "$ITEM_ID" ]; then
     break

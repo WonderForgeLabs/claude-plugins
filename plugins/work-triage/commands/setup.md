@@ -83,7 +83,7 @@ Use AskUserQuestion — ONE question:
 - **Skip for now** — I'll set them up later
 
 If "Need help", explain:
-- `CLAUDE_CODE_OAUTH_TOKEN`: Get from claude.ai account settings. Add via `gh secret set CLAUDE_CODE_OAUTH_TOKEN` or Settings > Secrets > Actions in the repo.
+- `CLAUDE_CODE_OAUTH_TOKEN`: Generate from the [Claude Code Action setup docs](https://docs.anthropic.com/en/docs/claude-code/github-actions). Add via `gh secret set CLAUDE_CODE_OAUTH_TOKEN` or repo Settings > Secrets and variables > Actions.
 - `GH_PROJECTS_PAT`: Create a GitHub PAT (classic) with `project` scope for the org. Add via `gh secret set GH_PROJECTS_PAT` or Settings > Secrets > Actions.
 
 ## Step 5: Plan & Confirm
@@ -112,9 +112,15 @@ Only list files that will actually be created (skip existing ones). Wait for the
 
 ## Step 6: Execute
 
-After user confirms:
+After user confirms, first check for a clean working tree:
 
 ```bash
+# Verify clean working tree
+if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+  echo "You have uncommitted changes. Please commit or stash them before running setup."
+  # Stop and ask the user to handle their changes
+fi
+
 # Create branch
 git checkout -b chore/setup-work-triage-automation
 
