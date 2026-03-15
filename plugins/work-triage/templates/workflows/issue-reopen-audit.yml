@@ -1,0 +1,148 @@
+name: Issue Reopen Audit
+
+on:
+  issues:
+    types: [closed]
+  schedule:
+    - cron: '0 */12 * * *'
+
+jobs:
+  audit-closed:
+    # On closed trigger: same actor restrictions as intake
+    if: |
+      github.event_name == 'schedule' ||
+      (
+        github.event_name == 'issues' &&
+        github.event.action == 'closed' &&
+        (
+          github.event.issue.author_association == 'MEMBER' ||
+          github.event.issue.author_association == 'COLLABORATOR' ||
+          github.event.issue.author_association == 'OWNER' ||
+          github.event.sender.login == 'claude[bot]' ||
+          github.event.sender.login == 'copilot[bot]'
+        ) &&
+        !contains(github.event.issue.labels.*.name, 'wontfix') &&
+        !contains(github.event.issue.labels.*.name, 'not-planned') &&
+        !contains(github.event.issue.labels.*.name, 'duplicate') &&
+        !contains(github.event.issue.labels.*.name, 'invalid')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'schedule' && 30 || 10 }}
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Issue Reopen Audit with Claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"
+          AUDIT_REPO: ${{ github.repository }}
+          AUDIT_EVENT: ${{ github.event_name }}
+          AUDIT_ISSUE_NUMBER: ${{ github.event.issue.number || '' }}
+        with:
+          allowed_bots: "claude[bot],copilot[bot]"
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --allowedTools "Bash(gh:*),mcp__github__get_issue,mcp__github__update_issue,mcp__github__add_issue_comment,mcp__github__search_issues" --model "claude-sonnet-4-6" --max-turns 25
+          prompt: |
+            You are an issue reopen audit agent for the WonderForge platform. Your job is to check if a closed issue should be re-opened because it has unfinished work (open sub-issues or unchecked task list items).
+
+            ## Context
+
+            - REPO: Use the AUDIT_REPO environment variable
+            - EVENT: Use the AUDIT_EVENT environment variable
+            - ISSUE_NUMBER: Use the AUDIT_ISSUE_NUMBER environment variable (only set for closed trigger)
+
+            ## Step 1: Determine which issues to audit
+
+            **If this is a `closed` trigger (AUDIT_EVENT == "issues"):**
+            Audit only the issue identified by AUDIT_ISSUE_NUMBER.
+
+            **If this is a `schedule` trigger (AUDIT_EVENT == "schedule"):**
+            Search for issues closed in the last 24 hours:
+            ```bash
+            YESTERDAY=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+            gh api --paginate "repos/${AUDIT_REPO}/issues?state=closed&since=${YESTERDAY}&per_page=100" \
+              --jq '.[] | select(.closed_at >= "'"${YESTERDAY}"'") | .number'
+            ```
+            For each issue found, skip any that have labels: `wontfix`, `not-planned`, `duplicate`, `invalid`.
+
+            ## Step 2: For each issue, run two checks
+
+            ### Check 1: Open sub-issues via GraphQL
+
+            Split AUDIT_REPO into owner and repo name, then query:
+            ```bash
+            OWNER=$(echo "$AUDIT_REPO" | cut -d/ -f1)
+            REPO_NAME=$(echo "$AUDIT_REPO" | cut -d/ -f2)
+            gh api graphql -f query='
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  issue(number: $number) {
+                    subIssues(first: 50, filterByStates: [OPEN]) {
+                      totalCount
+                      nodes { number title state }
+                    }
+                  }
+                }
+              }' -f owner="$OWNER" -f repo="$REPO_NAME" -F number=ISSUE_NUMBER
+            ```
+
+            ### Check 2: Unchecked task list items
+
+            Read the issue body and check for `- [ ]` patterns (unchecked checkboxes). You can get the body via:
+            ```bash
+            gh issue view ISSUE_NUMBER --repo "$AUDIT_REPO" --json body --jq '.body'
+            ```
+
+            ## Step 3: Decision logic
+
+            For each audited issue:
+
+            **If open sub-issues exist:**
+            1. Re-open the issue:
+               ```bash
+               gh issue reopen ISSUE_NUMBER --repo "$AUDIT_REPO"
+               ```
+            2. Ensure the `audit:reopened` label exists (create if needed):
+               ```bash
+               gh label create "audit:reopened" --description "Auto-reopened by reopen audit" --color "D93F0B" --repo "$AUDIT_REPO" 2>/dev/null || true
+               ```
+            3. Add the label:
+               ```bash
+               gh issue edit ISSUE_NUMBER --add-label "audit:reopened" --repo "$AUDIT_REPO"
+               ```
+            4. Add a comment listing the open sub-issues:
+               ```
+               🔄 **Auto-reopened**: This issue was closed but still has open sub-issues that need resolution:
+
+               - #X: title
+               - #Y: title
+
+               Please close the sub-issues first, or close this issue again with the `wontfix` label to suppress this check.
+               ```
+
+            **If unchecked task items exist AND no open sub-issues:**
+            Add a warning comment (do NOT re-open):
+            ```
+            ⚠️ **Audit notice**: This issue has unchecked task list items. If these tasks are still needed, consider creating sub-issues for them before closing.
+            ```
+
+            **If neither condition is true:**
+            Do nothing for this issue.
+
+            ## Important Guidelines
+
+            - DO NOT close any issues
+            - DO NOT modify issue content (title, body)
+            - Only re-open issues when open sub-issues are confirmed
+            - Be idempotent: if an issue already has the `audit:reopened` label, check if it still has open sub-issues before commenting again
+            - For scheduled runs, process all matching issues but respect rate limits

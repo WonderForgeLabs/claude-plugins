@@ -80,7 +80,7 @@ If the user specified explicit PR numbers or `--exclude` flags, proceed with tho
 
 ### Phase 2: Parallel Evaluation
 
-Before dispatching agents, read `references/evaluation-criteria.md` for the full decision matrix, staleness/superseded signal tables, bot PR patterns, and conflict severity definitions. Incorporate these criteria into agent instructions.
+Before dispatching agents, read `references/evaluation-criteria.md` for the full decision matrix, staleness/superseded signal tables, bot PR patterns, and conflict severity definitions. Also read `${CLAUDE_PLUGIN_ROOT}/references/how-we-work.md` for the philosophy governing these evaluations — especially the principles on graph traversal and partial completion tracking. Incorporate these criteria into agent instructions.
 
 Dispatch one agent per PR using the Agent tool. Each agent MUST use `isolation: "worktree"` to work on an isolated copy. Each agent needs access to `Bash`, `Read`, `Grep`, and `Glob` tools.
 
