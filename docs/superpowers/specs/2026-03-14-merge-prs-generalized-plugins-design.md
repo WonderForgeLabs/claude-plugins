@@ -73,7 +73,7 @@ else
 fi
 
 # Usage — always pipe the file via stdin:
-VALUE=$(cat "$CONFIG_FILE" | $YQ '.some.key // "default"')
+VALUE=$(cat "$CONFIG_FILE" | $YQ '.some.key // "default"' 2>/dev/null || echo "default")
 # For list reads that may be empty, intentionally swallow parse errors — hooks must never block:
 ITEMS=$(cat "$CONFIG_FILE" | $YQ '.some.list[] // ""' 2>/dev/null || true)
 ```
@@ -240,6 +240,7 @@ If no PR is found for the current branch, the skill informs the user and asks wh
 - Hooks use `$CLAUDE_PROJECT_DIR` for the project root and `$CLAUDE_PLUGIN_ROOT` for the plugin installation dir — both set by Claude Code at runtime.
 - All hooks exit 0 on non-fatal conditions (missing tool, disabled guard, file extension mismatch) so they never block Claude unexpectedly.
 - Config reads always pipe the file to yq via stdin (`cat "$CONFIG_FILE" | $YQ ...`) so native and Docker yq behave identically.
+- Hooks that guard file edits must register for `Edit|Write|MultiEdit` tool matchers to prevent bypass via `MultiEdit`.
 
 ---
 
