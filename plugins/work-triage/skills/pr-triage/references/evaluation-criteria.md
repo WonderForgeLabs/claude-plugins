@@ -5,7 +5,7 @@
 | Signal | Severity | Detection |
 |--------|----------|-----------|
 | Age > 30 days with no updates | High | `createdAt` / `updatedAt` delta |
-| Behind main by 50+ commits | High | `gh api repos/{REPO}/compare/{BRANCH}...main --jq .ahead_by` |
+| Behind main by 50+ commits | High | `gh api repos/{REPO}/compare/main...{BRANCH} --jq .behind_by` |
 | Merge conflicts present | Medium | `mergeable: CONFLICTING` from `gh pr view` |
 | No CI checks passing | Medium | `gh pr checks {NUMBER}` shows failures |
 | Author has not responded in 14+ days | Medium | Last comment timestamp from author |

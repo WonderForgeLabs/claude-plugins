@@ -1,4 +1,5 @@
 ---
+name: pr-triage
 description: Triage open PRs — identify stale, superseded, or abandoned PRs and recommend actions
 argument-hint: "[PR numbers...] [--all] [--exclude <numbers>]"
 allowed-tools: ["Bash", "Read", "Agent", "Glob", "Grep"]

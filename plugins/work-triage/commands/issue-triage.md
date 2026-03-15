@@ -1,4 +1,5 @@
 ---
+name: issue-triage
 description: Triage open issues — identify completed, stale, or unblocked issues and recommend actions
 argument-hint: "[issue numbers...] [--all] [--label <label>] [--exclude <numbers>]"
 allowed-tools: ["Bash", "Read", "Agent", "Glob", "Grep"]

@@ -32,7 +32,7 @@ Issues may express blocking relationships in several ways:
 To check if a blocker is resolved:
 ```bash
 # Extract referenced issue numbers from body
-BLOCKERS=$(gh issue view {NUMBER} --json body -q .body | grep -oP '(?:blocked by|depends on|waiting for) #\K\d+')
+BLOCKERS=$(gh issue view {NUMBER} --json body -q .body | grep -oE '(blocked by|depends on|waiting for) #[0-9]+' | grep -oE '[0-9]+$')
 
 # Check each blocker's state
 for B in $BLOCKERS; do
