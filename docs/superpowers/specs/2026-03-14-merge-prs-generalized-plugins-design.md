@@ -56,6 +56,8 @@ If bootstrap fails (e.g. permissions error), the hook exits 0 immediately — it
 
 For **slash commands** (which have no hook), bootstrap runs as the first step inside the skill/command itself before any config is read.
 
+**Config replacement:** The project config file fully replaces the shipped defaults — there is no merging. If a user removes a pattern from their config, that guard no longer covers those files. This is intentional: users have full control over their project's config.
+
 ### yq resolution
 
 Resolved inline in each hook and command (self-contained, no shared script dependency). All reads pipe the config file via stdin so the Docker form works identically to the native form:
@@ -100,7 +102,6 @@ guards:
       - "*.env"
       - "*.env.*"
       - "*secrets*"
-      - "*.env.local"
   generated_code:
     enabled: true
     patterns:
@@ -123,7 +124,7 @@ guards:
     shellcheck_severity: warning
 ```
 
-All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. In `case` statements, `*` matches any string **including** path separators — this is different from filename expansion (globbing) where `*` does not cross directories. So `*.env` in a `case` pattern matches both `foo.env` and `src/config/foo.env`. For example: `case "src/config/.env" in *.env) echo match;; esac` — this matches because `*` in `case` crosses `/`. The default `env_files` patterns are therefore correct for catching nested files. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
+All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. In `case` statements, `*` matches any string **including** path separators — this is different from filename expansion (globbing) where `*` does not cross directories. So `*.env` in a `case` pattern matches both `foo.env` and `src/config/foo.env`. For example: `case "src/config/.env" in *.env) echo match;; esac` — this matches because `*` in `case` crosses `/`. The default `env_files` patterns are therefore correct for catching nested files. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity. Use `shellcheck --format=gcc` for clean single-line-per-issue output that is easy to parse in hook scripts.
 
 ### web-quality
 
