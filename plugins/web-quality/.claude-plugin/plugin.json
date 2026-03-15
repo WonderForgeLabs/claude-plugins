@@ -1,7 +1,7 @@
 {
   "name": "web-quality",
   "version": "1.0.0",
-  "description": "TypeScript/JavaScript quality hooks — auto-lint, type-check, and test runner with console.log and any-type warnings.",
+  "description": "TypeScript/JavaScript quality hooks — auto-lint, type-check, and test runner.",
   "author": {
     "name": "WonderForgeLabs",
     "url": "https://github.com/WonderForgeLabs"

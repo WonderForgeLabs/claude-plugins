@@ -45,7 +45,7 @@
     },
     {
       "name": "web-quality",
-      "description": "TypeScript/JavaScript quality hooks — auto-lint, type-check, and test runner with console.log and any-type warnings.",
+      "description": "TypeScript/JavaScript quality hooks — auto-lint, type-check, and test runner.",
       "version": "1.0.0",
       "source": "./plugins/web-quality",
       "category": "quality",
