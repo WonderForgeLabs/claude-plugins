@@ -1,0 +1,12 @@
+{
+  "name": "work-triage",
+  "version": "1.0.0",
+  "description": "Triage open PRs and issues after completing epics — identify abandoned, superseded, or stale work items and recommend close/update/keep",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/claude-plugins",
+  "license": "MIT",
+  "keywords": ["triage", "pr", "issues", "stale", "cleanup", "backlog", "grooming"]
+}

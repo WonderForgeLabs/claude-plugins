@@ -90,6 +90,18 @@
         "url": "https://github.com/WonderForgeLabs"
       },
       "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/adr"
+    },
+    {
+      "name": "work-triage",
+      "description": "Triage open PRs and issues after completing epics — identify abandoned, superseded, or stale work items and recommend close/update/keep",
+      "version": "1.0.0",
+      "source": "./plugins/work-triage",
+      "category": "development",
+      "author": {
+        "name": "WonderForgeLabs",
+        "url": "https://github.com/WonderForgeLabs"
+      },
+      "homepage": "https://github.com/WonderForgeLabs/claude-plugins/tree/main/plugins/work-triage"
     }
   ]
 }
