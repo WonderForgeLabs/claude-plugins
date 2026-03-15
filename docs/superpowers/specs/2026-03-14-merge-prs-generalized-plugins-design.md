@@ -100,7 +100,7 @@ guards:
       - "*.env"
       - "*.env.*"
       - "*secrets*"
-      - "*.local"
+      - "*.env.local"
   generated_code:
     enabled: true
     patterns:
@@ -123,7 +123,7 @@ guards:
     shellcheck_severity: warning
 ```
 
-All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. In `case` statements, `*` matches any string **including** path separators — this is different from filename expansion (globbing) where `*` does not cross directories. So `*.env` in a `case` pattern matches both `foo.env` and `src/config/foo.env`. The default `env_files` patterns are therefore correct for catching nested files. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
+All four guards have an `enabled` flag. When `enabled: false`, that hook exits 0 immediately without checking patterns. Hooks read pattern lists at runtime by piping the config file to yq. Patterns are matched against the **full path as received from Claude Code** (the `tool_input.file_path` value) using shell `case` glob matching. In `case` statements, `*` matches any string **including** path separators — this is different from filename expansion (globbing) where `*` does not cross directories. So `*.env` in a `case` pattern matches both `foo.env` and `src/config/foo.env`. For example: `case "src/config/.env" in *.env) echo match;; esac` — this matches because `*` in `case` crosses `/`. The default `env_files` patterns are therefore correct for catching nested files. `shell_scripts` has no `patterns` key — it triggers on any `.sh` file edit and runs shellcheck at the configured severity.
 
 ### web-quality
 
