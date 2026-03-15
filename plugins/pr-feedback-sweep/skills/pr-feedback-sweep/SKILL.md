@@ -26,8 +26,14 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # Inline fallback
     cat > "$CONFIG_FILE" <<'YAML'
 max_prs: 30
-skip_bots: true
-bot_usernames: []
+skip_bots: false
+bot_usernames:
+  - "github-actions[bot]"
+  - "copilot"
+  - "dependabot[bot]"
+  - "renovate[bot]"
+  - "codecov[bot]"
+  - "github-advanced-security[bot]"
 YAML
   fi
 fi
@@ -49,12 +55,12 @@ fi
 
 if [ -n "$YQ" ]; then
   MAX_PRS=$($YQ '.max_prs // 30' "$CONFIG_FILE")
-  SKIP_BOTS=$($YQ '.skip_bots // true' "$CONFIG_FILE")
+  SKIP_BOTS=$($YQ '.skip_bots // false' "$CONFIG_FILE")
   BOT_USERNAMES=$($YQ '.bot_usernames // [] | .[]' "$CONFIG_FILE")
 else
   MAX_PRS=30
-  SKIP_BOTS=true
-  BOT_USERNAMES=""
+  SKIP_BOTS=false
+  BOT_USERNAMES="github-actions[bot] copilot dependabot[bot] renovate[bot] codecov[bot] github-advanced-security[bot]"
 fi
 ```
 
@@ -125,16 +131,7 @@ If the GitHub API is rate limited, use the MCP tools instead:
 
 ### Phase 3: Compile Summary
 
-**Filter bot comments** when `skip_bots` is true. The following usernames are always filtered:
-
-- `github-actions[bot]`
-- `copilot`
-- `dependabot[bot]`
-- `renovate[bot]`
-- `codecov[bot]`
-- `github-advanced-security[bot]`
-
-Additionally filter any usernames listed in the `bot_usernames` config array (these are merged with the hardcoded list above).
+**Filter bot comments** when `skip_bots` is true. Read `bot_usernames` from config — the defaults ship with common bot accounts, and users can add or remove entries in their project-local config file.
 
 Present a table organized by PR:
 
