@@ -1,0 +1,40 @@
+{
+  "description": "TypeScript/JavaScript quality hooks for auto-linting, type-checking, and test running",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/scripts/eslint-fix.sh",
+            "timeout": 30,
+            "statusMessage": "Linting TypeScript/JavaScript..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/scripts/typecheck.sh",
+            "timeout": 60,
+            "statusMessage": "Type-checking TypeScript..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/scripts/jest-related.sh",
+            "timeout": 60,
+            "statusMessage": "Running related tests..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+eslint:
+  enabled: true
+  extensions: [".ts", ".tsx", ".js", ".jsx"]
+typescript:
+  enabled: true
+  extensions: [".ts", ".tsx"]
+jest:
+  enabled: true
+  test_patterns: ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"]
