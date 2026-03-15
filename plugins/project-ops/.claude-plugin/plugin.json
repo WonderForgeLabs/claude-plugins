@@ -1,0 +1,12 @@
+{
+  "name": "project-ops",
+  "version": "0.1.0",
+  "description": "GitHub Project V2 management — auto-discovery, opinionated board setup, and issue hygiene hooks",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/project-ops",
+  "license": "MIT",
+  "keywords": ["github", "project-management", "project-board", "issues", "hooks"]
+}
