@@ -34,5 +34,5 @@ SEVERITY=$(cat "$CONFIG_FILE" | $YQ '.guards.shell_scripts.shellcheck_severity' 
 
 [ -f "$FILE_PATH" ] || exit 0
 command -v shellcheck >/dev/null 2>&1 && {
-  shellcheck --severity="$SEVERITY" "$FILE_PATH" 2>&1 | head -50 || true
+  shellcheck --severity="$SEVERITY" --format=gcc "$FILE_PATH" 2>&1 | head -50 || true
 } || true

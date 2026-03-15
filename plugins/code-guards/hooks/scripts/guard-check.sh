@@ -39,7 +39,7 @@ PATTERNS=$(cat "$CONFIG_FILE" | $YQ ".guards.${GUARD_NAME}.patterns[]" 2>/dev/nu
 # Check each pattern — if file matches ANY pattern, BLOCK
 while IFS= read -r pattern; do
   [ -z "$pattern" ] && continue
-  # Use bash extended globbing for pattern matching
+  # Use bash glob pattern matching
   # The ! (negation) logic: we block if it DOES match
   case "$FILE_PATH" in
     $pattern)
