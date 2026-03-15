@@ -34,15 +34,21 @@ The plugin reads settings from `.claude/pr-feedback-sweep/config.yaml` in your p
 
 ```yaml
 max_prs: 30
-skip_bots: true
-bot_usernames: []
+skip_bots: false
+bot_usernames:
+  - "github-actions[bot]"
+  - "copilot"
+  - "dependabot[bot]"
+  - "renovate[bot]"
+  - "codecov[bot]"
+  - "github-advanced-security[bot]"
 ```
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `max_prs` | `30` | Maximum number of open PRs to scan in `--all` mode |
-| `skip_bots` | `true` | Filter out comments from known bot usernames |
-| `bot_usernames` | `[]` | Additional bot usernames to filter, merged with the hardcoded list (`github-actions[bot]`, `copilot`, `dependabot[bot]`, `renovate[bot]`, `codecov[bot]`, `github-advanced-security[bot]`) |
+| `skip_bots` | `false` | Filter out comments from known bot usernames |
+| `bot_usernames` | *(6 common bots)* | Bot usernames to filter. Defaults ship with common bots (`github-actions[bot]`, `copilot`, `dependabot[bot]`, `renovate[bot]`, `codecov[bot]`, `github-advanced-security[bot]`). Users can add or remove entries freely. |
 
 Config values are read via `yq`. If `yq` is not installed, the plugin falls back to Docker (`mikefarah/yq` image). If neither is available, built-in defaults are used with a warning.
 
