@@ -22,7 +22,7 @@ else
 fi
 
 # Check if jest is enabled
-ENABLED=$($YQ '.jest.enabled' < "$CONFIG_FILE")
+ENABLED=$($YQ '.jest.enabled' < "$CONFIG_FILE" | tr -d '"')
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read test patterns

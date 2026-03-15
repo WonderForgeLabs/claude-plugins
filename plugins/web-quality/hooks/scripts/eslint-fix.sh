@@ -22,7 +22,7 @@ else
 fi
 
 # Check if eslint is enabled
-ENABLED=$($YQ '.eslint.enabled' < "$CONFIG_FILE")
+ENABLED=$($YQ '.eslint.enabled' < "$CONFIG_FILE" | tr -d '"')
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read extensions list

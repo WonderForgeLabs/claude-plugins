@@ -22,7 +22,7 @@ else
 fi
 
 # Check if typescript is enabled
-ENABLED=$($YQ '.typescript.enabled' < "$CONFIG_FILE")
+ENABLED=$($YQ '.typescript.enabled' < "$CONFIG_FILE" | tr -d '"')
 [ "$ENABLED" != "true" ] && exit 0
 
 # Read extensions list
