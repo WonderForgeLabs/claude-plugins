@@ -18,9 +18,9 @@ claude plugin install code-guards@wonderforgelabs-plugins
 
 | Guard | Patterns | Purpose |
 |-------|----------|---------|
-| Environment files | `*.env`, `*.env.*`, `*secrets.json`, `*secrets.yaml`, `*secrets.yml`, `*secrets.env`, `*.secret`, `*.env.local` | Prevent accidental secret exposure |
+| Environment files | `*.env`, `*.env.*`, `*secrets.json`, `*secrets.yaml`, `*secrets.yml`, `*secrets.env`, `*.secret` | Prevent accidental secret exposure |
 | Generated code | `*/Generated/*`, `*/obj/*`, `*/bin/*`, `*/dist/*`, `*/build/*` | Protect build outputs |
-| Lock files | `yarn.lock`, `package-lock.json`, `packages.lock.json`, `pnpm-lock.yaml`, `Cargo.lock`, `go.sum`, `poetry.lock`, `Gemfile.lock`, `composer.lock` | Prevent dependency corruption |
+| Lock files | `yarn.lock`, `*/yarn.lock`, `package-lock.json`, `*/package-lock.json`, `packages.lock.json`, `*/packages.lock.json`, `pnpm-lock.yaml`, `*/pnpm-lock.yaml`, `Cargo.lock`, `*/Cargo.lock`, `go.sum`, `*/go.sum`, `poetry.lock`, `*/poetry.lock`, `Gemfile.lock`, `*/Gemfile.lock`, `composer.lock`, `*/composer.lock` | Prevent dependency corruption |
 
 ### PostToolUse Checks (runs after editing)
 

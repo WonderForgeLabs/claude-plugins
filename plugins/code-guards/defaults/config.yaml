@@ -9,7 +9,6 @@ guards:
       - "*secrets.yml"
       - "*secrets.env"
       - "*.secret"
-      - "*.env.local"
   generated_code:
     enabled: true
     patterns:
@@ -21,14 +20,23 @@ guards:
   lock_files:
     enabled: true
     patterns:
+      - "yarn.lock"
       - "*/yarn.lock"
+      - "package-lock.json"
       - "*/package-lock.json"
+      - "packages.lock.json"
       - "*/packages.lock.json"
+      - "pnpm-lock.yaml"
       - "*/pnpm-lock.yaml"
+      - "Cargo.lock"
       - "*/Cargo.lock"
+      - "go.sum"
       - "*/go.sum"
+      - "poetry.lock"
       - "*/poetry.lock"
+      - "Gemfile.lock"
       - "*/Gemfile.lock"
+      - "composer.lock"
       - "*/composer.lock"
   shell_scripts:
     enabled: true
