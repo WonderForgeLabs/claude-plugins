@@ -1,13 +1,13 @@
 ---
 name: pr-triage
-description: "This skill should be used when the user asks to \"triage PRs\", \"check stale PRs\", \"review open PRs\", \"clean up PRs\", \"are these PRs still relevant\", \"split this PR\", or after completing a large epic with many parallel branches. Evaluates open PRs against main to identify abandoned, superseded, or stale work. Works in tandem with the issue-triage skill."
+description: "This skill should be used when the user asks to \"triage PRs\", \"check stale PRs\", \"review open PRs\", \"clean up PRs\", \"are these PRs still relevant\", \"split this PR\", or after completing a large epic with many parallel branches. Evaluates open PRs against the default branch to identify abandoned, superseded, or stale work. Works in tandem with the issue-triage skill."
 ---
 
 # PR Triage
 
 Evaluate open PRs to determine which are stale, superseded, conflicted, or ready to merge. Dispatches parallel agents to analyze each PR in an isolated worktree.
 
-**This skill works in tandem with issue-triage.** When evaluating PRs, cross-reference linked issues to understand the full picture: a PR may look stale but its linked issue reveals it's blocked; an issue may appear open but a PR already landed the work. If the user has also requested issue triage, coordinate findings between both skills. Use all available context: source code on main, PR diffs/titles/descriptions/review feedback, linked issue contents, markdown docs, and any memory tools available.
+**This skill works in tandem with issue-triage.** When evaluating PRs, cross-reference linked issues to understand the full picture: a PR may look stale but its linked issue reveals it's blocked; an issue may appear open but a PR already landed the work. If the user has also requested issue triage, coordinate findings between both skills. Use all available context: source code on the default branch, PR diffs/titles/descriptions/review feedback, linked issue contents, markdown docs, and any memory tools available.
 
 ## Setup
 
@@ -162,7 +162,7 @@ Collect all agent results and compile into a summary table:
 
 **Recommendation categories:**
 
-- **Close (completed)** — work already landed on main. Cite the commit or PR that did it.
+- **Close (completed)** — work already landed on the default branch. Cite the commit or PR that did it.
 - **Close (superseded)** — architectural changes make this PR irrelevant. Explain what changed.
 - **Rework** — concept still valid but needs significant updates. List what needs changing.
 - **Split** — PR is too large or covers multiple concerns. See "Splitting Mega PRs" below.

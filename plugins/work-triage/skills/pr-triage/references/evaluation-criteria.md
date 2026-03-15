@@ -16,7 +16,7 @@
 | Signal | Detection |
 |--------|-----------|
 | Same files modified on main after PR creation | `git log $DEFAULT_BRANCH --since={CREATED} -- {FILES}` has hits |
-| Same function/class names exist with different implementation | Grep main for identifiers from the PR diff |
+| Same function/class names exist with different implementation | Grep default branch for identifiers from the PR diff |
 | Feature flag referenced in PR was removed from main | Grep for flag name, absent on main |
 | PR description references a design that changed | Manual assessment — compare PR goals to current code |
 | Another PR merged that addresses the same issue | `git log $DEFAULT_BRANCH --grep="#{ISSUE}"` or linked issue has merged PR |
@@ -37,7 +37,7 @@
 ## Recommendation Decision Matrix
 
 ```
-Has work landed on main for this PR's goals?
+Has work landed on the default branch for this PR's goals?
 ├── Yes → Close (completed)
 └── No
     Has the surrounding code changed architecturally?

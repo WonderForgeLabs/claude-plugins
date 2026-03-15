@@ -158,9 +158,9 @@ Dispatch one agent per issue (or batch of small issues) using the Agent tool. Ea
 >    ```
 >
 > 7. **Assess completion status:**
->    - **Fully done**: All described work exists on main. Cite evidence.
+>    - **Fully done**: All described work exists on the default branch. Cite evidence.
 >    - **Partially done**: Some work landed, some remains. List what's complete and what's remaining with specific details.
->    - **Not done**: No evidence of the work on main.
+>    - **Not done**: No evidence of the work on the default branch.
 >    For partial completion, estimate percentage and describe remaining work items.
 >
 > 8. **Report back** with:

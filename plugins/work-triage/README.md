@@ -40,7 +40,7 @@ Or trigger naturally: "triage issues", "groom backlog", "check stale issues", "a
 ### PR Triage (4 phases)
 
 1. **Discovery** — lists open PRs with metadata (age, behind count, mergeable status, author)
-2. **Parallel Evaluation** — dispatches one agent per PR in an isolated worktree to check rebase feasibility, overlapping changes on main, and whether the work landed elsewhere
+2. **Parallel Evaluation** — dispatches one agent per PR in an isolated worktree to check rebase feasibility, overlapping changes on the default branch, and whether the work landed elsewhere
 3. **Synthesis** — compiles results into a recommendation table (close/rework/rebase & merge/keep)
 4. **Act** — offers to close, label, or comment on PRs with user approval for each action
 

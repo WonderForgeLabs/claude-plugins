@@ -4,7 +4,7 @@
 
 | Signal | Confidence | Detection |
 |--------|------------|-----------|
-| Commit on main references issue number | High | `git log $DEFAULT_BRANCH --grep="#{NUMBER}"` |
+| Commit on default branch references issue number | High | `git log $DEFAULT_BRANCH --grep="#{NUMBER}"` |
 | Linked PR was merged | High | `gh api repos/{REPO}/issues/{NUMBER}/timeline` cross-references with merged PRs |
 | Code described in issue exists on main | Medium | Grep for feature/function names from issue body |
 | Issue author commented "done" or "fixed" | Medium | Parse issue comments for acknowledgement |
@@ -51,7 +51,7 @@ Large issues that should be split exhibit these patterns:
 ## Recommendation Decision Matrix
 
 ```
-Is the described work done on main?
+Is the described work done on the default branch?
 ├── Fully done → Close (completed)
 ├── Partially done
 │   └── Remaining work still relevant?
