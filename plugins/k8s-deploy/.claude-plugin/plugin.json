@@ -1,0 +1,12 @@
+{
+  "name": "k8s-deploy",
+  "version": "1.0.0",
+  "description": "Kubernetes deployment workflow with Kustomize, ArgoCD, and Vault patterns. Includes YAML linting hook.",
+  "author": {
+    "name": "WonderForgeLabs",
+    "url": "https://github.com/WonderForgeLabs"
+  },
+  "repository": "https://github.com/WonderForgeLabs/claude-plugins",
+  "license": "MIT",
+  "keywords": ["kubernetes", "kustomize", "argocd", "vault", "deployment", "yaml"]
+}

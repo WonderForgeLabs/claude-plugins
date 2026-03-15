@@ -1,0 +1,18 @@
+{
+  "description": "YAML linting for Kubernetes deployment manifests",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE_PATH\" ] && exit 0; case \"$FILE_PATH\" in */deploy/*.yaml|*/deploy/*.yml|*kustomization*.yaml|*kustomization*.yml) command -v yamllint >/dev/null 2>&1 && { yamllint -d relaxed \"$FILE_PATH\" 2>&1 | head -10 || true; } || echo 'yamllint not found, skipping' >&2;; esac",
+            "timeout": 10,
+            "statusMessage": "Validating YAML..."
+          }
+        ]
+      }
+    ]
+  }
+}
